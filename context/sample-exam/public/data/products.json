@@ -1,0 +1,122 @@
+[
+  {
+    "id": "1",
+    "offer": "50",
+    "img": "/images/jacket-3.jpg",
+    "type": "Jacket",
+    "name": "Mens Winter Leathers Jackets",
+    "price": "96.00",
+    "stars": [
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star grey-star'></i>",
+      "<i class='fa-solid fa-star grey-star'></i>"
+    ]
+  },
+  {
+    "id": "2",
+    "offer": "20",
+    "img": "/images/shirt-1.jpg",
+    "type": "Shirt",
+    "name": "Pure Garment Dyed Cotton Shirt",
+    "price": "56.00",
+    "stars": [
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star grey-star'></i>",
+      "<i class='fa-solid fa-star grey-star'></i>"
+    ]
+  },
+  {
+    "id": "3",
+    "offer": "11",
+    "img": "/images/jacket-5.jpg",
+    "type": "Jacket",
+    "name": "MEN Yarn Fleece Full-Zip Jacket",
+    "price": "65.00",
+    "stars": [
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star grey-star'></i>"
+    ]
+  },
+  {
+    "id": "4",
+    "offer": "29",
+    "img": "/images/clothes-3.jpg",
+    "type": "Skirt",
+    "name": "Black Floral Wrap Midi Skirt",
+    "price": "35.00",
+    "stars": [
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>"
+    ]
+  },
+  {
+    "id": "5",
+    "offer": "33",
+    "img": "/images/watch-3.jpg",
+    "type": "Pocket Watch",
+    "name": "Pocket Watch Leather Pouch",
+    "price": "150.00",
+    "stars": [
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>"
+    ]
+  },
+  {
+    "id": "6",
+    "offer": "33",
+    "img": "/images/watch-1.jpg",
+    "type": "Digital Watch",
+    "name": "Smart watch Vital Plus",
+    "price": "180.00",
+    "stars": [
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>"
+    ]
+  },
+  {
+    "id": "7",
+    "offer": "35",
+    "img": "/images/party-wear-1.jpg",
+    "type": "Party wear shoes",
+    "name": "Womens Party Wear Shoes",
+    "price": "170.00",
+    "stars": [
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>"
+    ]
+  },
+  {
+    "id": "8",
+    "offer": "35",
+    "img": "/images/sports-1.jpg",
+    "type": "Sport shoes",
+    "name": "Running & Trekking Shoes - White",
+    "price": "89.00",
+    "stars": [
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>",
+      "<i class='fa-solid fa-star'></i>"
+    ]
+  }
+]

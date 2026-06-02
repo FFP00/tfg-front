@@ -1,0 +1,12 @@
+[
+    {
+        "id" : "1",
+        "text" : "This is my first note",
+        "date" : "03/11/2021"
+    },
+    {
+        "id" : "2",
+        "text" : "Comprar ropa",
+        "date" : "19/8/2022"
+    }
+]
