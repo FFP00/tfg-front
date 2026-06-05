@@ -1,0 +1,44 @@
+@theme {
+	--color-burnt-bg: #0b0b14;
+	--color-burnt-card: #13131f;
+	--color-burnt-panel: #1a1a2a;
+	--color-burnt-surface: #0f0f1a;
+	--color-burnt-border: #252538;
+	--color-burnt-border-hover: #3a3a58;
+	--color-burnt-accent: #b91c1c;
+	--color-burnt-accent-hover: #991b1b;
+	--color-burnt-accent-muted: #b91c1c26;
+	--color-burnt-red: #e11d48;
+	--color-burnt-red-hover: #be123c;
+	--color-burnt-green: #22c55e;
+	--color-burnt-green-hover: #16a34a;
+	--color-burnt-yellow: #eab308;
+	--color-burnt-text: #eeedf5;
+	--color-burnt-muted: #8b8ba7;
+	--color-burnt-faint: #5a5a75;
+}
+
+@layer base {
+	::selection {
+		background-color: #b91c1c40;
+		color: #eeedf5;
+	}
+
+	::-webkit-scrollbar {
+		width: 6px;
+		height: 6px;
+	}
+
+	::-webkit-scrollbar-track {
+		background: #0b0b14;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background: #252538;
+		border-radius: 3px;
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background: #b91c1c;
+	}
+}
