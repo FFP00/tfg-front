@@ -1,7 +1,8 @@
-import { ClipboardList, CreditCard, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EditProfile from "./Me/EditProfile";
+import FriendsCard from "./Me/FriendsCard";
 import ProfileCard from "./Me/ProfileCard";
 import WalletCard from "./Me/WalletCard";
 
@@ -75,36 +76,13 @@ export default function Me() {
 					<WalletCard wallet={wallet} />
 				</div>
 
-				<div className="space-y-4 lg:col-span-2">
+				<div className="space-y-6 lg:col-span-2">
 					<EditProfile customer={customer} token={token} onUpdate={fetchMe} />
-
-					<div className="rounded-lg border border-burnt-border bg-burnt-card p-5">
-						<p className="mb-3 text-sm font-semibold text-burnt-muted uppercase tracking-widest">
-							Accesos rápidos
-						</p>
-						<div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-							{[
-								{ to: "/me/history", label: "Historial de compras", Icon: ClipboardList },
-								{ to: "/me/deposit", label: "Recargar saldo", Icon: CreditCard },
-							].map(({ to, label, Icon }) => (
-								<a
-									key={to}
-									href={to}
-									className="flex items-center gap-3 rounded-md border border-burnt-border p-3 transition-colors hover:border-burnt-accent/50 hover:bg-burnt-panel"
-								>
-									<Icon size={18} strokeWidth={1.75} className="flex-none text-burnt-muted" />
-									<span className="text-sm font-medium text-burnt-text">{label}</span>
-								</a>
-							))}
-						</div>
-					</div>
+					<FriendsCard token={token} customerName={customer.name} />
 
 					<div className="rounded-lg border border-burnt-red/20 bg-burnt-card p-5">
-						<p className="mb-1 text-sm font-semibold text-burnt-text">Zona de peligro</p>
-						<p className="mb-4 text-xs text-burnt-muted">
-							Desactivar tu cuenta la oculta de todos los listados. El administrador puede
-							reactivarla.
-						</p>
+						<p className="mb-4 text-sm font-semibold text-burnt-text">Zona de peligro</p>
+
 						{confirmDeactivate ? (
 							<div className="flex gap-3">
 								<button

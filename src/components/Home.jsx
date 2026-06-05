@@ -79,12 +79,6 @@ export default function Home({ cart, addToCart, removeFromCart }) {
 								para <span className="font-medium text-burnt-text">"{search}"</span>
 							</span>
 						)}
-						{selectedGenre && (
-							<span>
-								{" "}
-								en <span className="font-medium text-burnt-text">{selectedGenre}</span>
-							</span>
-						)}
 					</p>
 					<GameGrid
 						games={searchResults}

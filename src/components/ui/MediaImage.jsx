@@ -17,7 +17,7 @@ export default function MediaImage({ src, alt, className = "" }) {
 			src={src}
 			alt={alt}
 			loading="lazy"
-			className="h-full w-full object-cover"
+			className={`h-full w-full object-cover ${className}`}
 			onError={() => setError(true)}
 		/>
 	);

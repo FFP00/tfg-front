@@ -17,6 +17,7 @@ export default function PurchaseCard({ game, encodedName, token, cart, addToCart
 			.catch(() => {});
 	}, [token, user?.name, encodedName]);
 
+	const type = localStorage.getItem("burnt_type");
 	const currency = getCustomerCurrency();
 	const base = parseFloat(game.release_price);
 	const discount = game.actual_discount;
@@ -73,7 +74,7 @@ export default function PurchaseCard({ game, encodedName, token, cart, addToCart
 						</>
 					)}
 				</button>
-			) : (
+			) : type !== "developer" && (
 				<Link
 					to="/login"
 					className="rounded-md border border-burnt-border px-4 py-2.5 text-sm text-burnt-muted transition-colors hover:text-burnt-text"

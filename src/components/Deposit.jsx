@@ -23,11 +23,7 @@ export default function Deposit() {
 
 	return (
 		<div className="mx-auto max-w-7xl px-4 py-8">
-			<div className="mb-6 flex items-center gap-3">
-				<Link to="/me" className="text-sm text-burnt-muted transition-colors hover:text-burnt-text">
-					← Mi cuenta
-				</Link>
-				<span className="text-burnt-faint">/</span>
+			<div className="mb-6">
 				<h1 className="text-lg font-bold text-burnt-text">Recargar saldo</h1>
 			</div>
 

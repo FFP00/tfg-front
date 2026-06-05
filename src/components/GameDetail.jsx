@@ -10,6 +10,7 @@ export default function GameDetail({ cart, addToCart, removeFromCart }) {
 	const [game, setGame] = useState(null);
 	const [reviews, setReviews] = useState([]);
 	const [activeMedia, setActiveMedia] = useState("store_1");
+	const [owned, setOwned] = useState(false);
 
 	const token = localStorage.getItem("burnt_token");
 	const type = localStorage.getItem("burnt_type");
@@ -31,6 +32,16 @@ export default function GameDetail({ cart, addToCart, removeFromCart }) {
 		}
 		load();
 	}, [name, navigate]);
+
+	useEffect(() => {
+		if (type !== "customer" || !token) return;
+		const user = JSON.parse(localStorage.getItem("burnt_user") ?? "null");
+		if (!user?.name) return;
+		fetch(`/api/customer/${encodeURIComponent(user.name)}/library`)
+			.then((r) => (r.ok ? r.json() : []))
+			.then((lib) => setOwned(lib.some((t) => t.name === decodeURIComponent(name))))
+			.catch(() => {});
+	}, [token, type, name]);
 
 	if (!game) {
 		return (
@@ -102,6 +113,7 @@ export default function GameDetail({ cart, addToCart, removeFromCart }) {
 				setReviews={setReviews}
 				token={purchaseToken}
 				encodedName={encodedName}
+				owned={owned}
 			/>
 		</div>
 	);

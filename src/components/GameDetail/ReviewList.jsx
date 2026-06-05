@@ -1,17 +1,20 @@
-import { Pencil, ThumbsDown, ThumbsUp } from "lucide-react";
+import { ArrowUp, Pencil, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useState } from "react";
+import AvatarImage from "../ui/AvatarImage";
 
-export default function ReviewList({ reviews: rawReviews, setReviews, token, encodedName }) {
+export default function ReviewList({ reviews: rawReviews, setReviews, token, encodedName, owned }) {
 	const reviews = [...rawReviews].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+	const currentUser = JSON.parse(localStorage.getItem("burnt_user") ?? "null")?.name ?? null;
 
 	const [form, setForm] = useState({ content: "", recommends: true });
 	const [sending, setSending] = useState(false);
 	const [msg, setMsg] = useState(null);
 	const [showForm, setShowForm] = useState(false);
 	const [voteErrors, setVoteErrors] = useState({});
+	const [voted, setVoted] = useState(new Set());
 
 	async function handleVote(customerName) {
-		if (!token) return;
+		if (!token || voted.has(customerName)) return;
 		setVoteErrors((prev) => ({ ...prev, [customerName]: null }));
 		try {
 			const res = await fetch(`/api/title/${encodedName}/reviews/${customerName}/vote`, {
@@ -23,6 +26,7 @@ export default function ReviewList({ reviews: rawReviews, setReviews, token, enc
 				setReviews((prev) =>
 					prev.map((r) => (r.customer_name === customerName ? { ...r, votes } : r)),
 				);
+				setVoted((prev) => new Set(prev).add(customerName));
 			} else {
 				const data = await res.json();
 				setVoteErrors((prev) => ({
@@ -71,7 +75,7 @@ export default function ReviewList({ reviews: rawReviews, setReviews, token, enc
 						<span className="text-base font-normal text-burnt-muted">({reviews.length})</span>
 					)}
 				</h2>
-				{token && !showForm && (
+				{token && owned && !showForm && (
 					<button
 						type="button"
 						onClick={() => setShowForm(true)}
@@ -176,51 +180,70 @@ export default function ReviewList({ reviews: rawReviews, setReviews, token, enc
 					{reviews.map((r) => (
 						<div
 							key={`${r.customer_name}-${r.created_at}`}
-							className="rounded-md border border-burnt-border bg-burnt-card p-4"
+							className="overflow-hidden rounded-lg border border-burnt-border bg-burnt-card"
 						>
-							<div className="mb-2 flex items-center justify-between gap-2">
-								<span className="text-sm font-semibold text-burnt-text">{r.customer_name}</span>
-								<span
-									className={`flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-										r.recommends
-											? "bg-burnt-green/15 text-burnt-green"
-											: "bg-burnt-red/15 text-burnt-red"
-									}`}
-								>
-									{r.recommends ? (
-										<ThumbsUp size={12} strokeWidth={1.75} />
-									) : (
-										<ThumbsDown size={12} strokeWidth={1.75} />
-									)}
-									{r.recommends ? "Recomienda" : "No recomienda"}
-								</span>
-							</div>
-							<p className="mb-3 text-sm text-burnt-muted">{r.content}</p>
-							<div className="flex flex-col gap-1">
-								<div className="flex items-center justify-between">
-									<span className="text-xs text-burnt-faint">
-										{new Date(r.created_at).toLocaleDateString("es-ES")}
+							<div className={`h-0.5 w-full ${r.recommends ? "bg-burnt-green" : "bg-burnt-red"}`} />
+							<div className="p-4">
+								<div className="mb-3 flex items-center justify-between gap-2">
+									<div className="flex items-center gap-2.5">
+										<div className="h-8 w-8 shrink-0 overflow-hidden rounded-md">
+											<AvatarImage
+												src={`/api/customer/${encodeURIComponent(r.customer_name)}/image/profile`}
+												alt={r.customer_name}
+												name={r.customer_name}
+											/>
+										</div>
+										<div>
+											<p className="text-sm font-semibold leading-tight text-burnt-text">
+												{r.customer_name}
+											</p>
+											<p className="text-xs text-burnt-faint">
+												{new Date(r.created_at).toLocaleDateString("es-ES")}
+											</p>
+										</div>
+									</div>
+									<span
+										className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
+											r.recommends
+												? "bg-burnt-green/15 text-burnt-green"
+												: "bg-burnt-red/15 text-burnt-red"
+										}`}
+									>
+										{r.recommends ? (
+											<ThumbsUp size={11} strokeWidth={1.75} />
+										) : (
+											<ThumbsDown size={11} strokeWidth={1.75} />
+										)}
+										{r.recommends ? "Recomienda" : "No recomienda"}
 									</span>
-									{token && (
+								</div>
+								<p className="mb-4 text-sm leading-relaxed text-burnt-muted">{r.content}</p>
+								<div className="flex items-center gap-3 border-t border-burnt-border/50 pt-3">
+									{token && r.customer_name !== currentUser ? (
 										<button
 											type="button"
 											onClick={() => handleVote(r.customer_name)}
-											className="flex items-center gap-1.5 rounded-lg border border-burnt-border px-2.5 py-1 text-xs text-burnt-muted transition-colors hover:border-burnt-accent/50 hover:text-burnt-text"
+											disabled={voted.has(r.customer_name)}
+											className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-colors ${
+												voted.has(r.customer_name)
+													? "cursor-default border-burnt-green/40 text-burnt-green"
+													: "border-burnt-border text-burnt-muted hover:border-burnt-green/40 hover:text-burnt-green"
+											}`}
+											title={voted.has(r.customer_name) ? "Ya marcaste como útil" : "Marcar como útil"}
 										>
-											<ThumbsUp size={14} strokeWidth={1.75} />
+											<ArrowUp size={11} strokeWidth={2} />
 											{r.votes} útil{r.votes !== 1 ? "es" : ""}
 										</button>
-									)}
-									{!token && (
-										<span className="flex items-center gap-1 text-xs text-burnt-faint">
-											<ThumbsUp size={14} strokeWidth={1.75} />
-											{r.votes}
+									) : (
+										<span className="flex items-center gap-1.5 rounded-full border border-burnt-border/50 px-3 py-1 text-xs text-burnt-faint">
+											<ArrowUp size={11} strokeWidth={2} />
+											{r.votes} útil{r.votes !== 1 ? "es" : ""}
 										</span>
 									)}
+									{voteErrors[r.customer_name] && (
+										<p className="ml-auto text-xs text-burnt-red">{voteErrors[r.customer_name]}</p>
+									)}
 								</div>
-								{voteErrors[r.customer_name] && (
-									<p className="text-right text-xs text-burnt-red">{voteErrors[r.customer_name]}</p>
-								)}
 							</div>
 						</div>
 					))}

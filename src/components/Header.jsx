@@ -97,20 +97,31 @@ export default function Header({ cartCount }) {
 				))}
 
 				{type !== "developer" && (
-					<Link
-						to="/cart"
-						title={cartCount > 0 ? `Carrito (${cartCount})` : "Carrito"}
-						className={`relative flex h-10 w-full items-center justify-center transition-colors ${
-							isActive("/cart")
-								? "text-burnt-accent bg-burnt-accent/10 border-r-2 border-burnt-accent"
-								: "text-burnt-faint hover:text-burnt-text hover:bg-burnt-panel"
-						}`}
-					>
-						<ShoppingCart size={18} strokeWidth={1.75} />
-						{cartCount > 0 && (
-							<span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-burnt-accent" />
+					<>
+						<Link
+							to="/cart"
+							title={cartCount > 0 ? `Carrito (${cartCount})` : "Carrito"}
+							className={`relative flex h-10 w-full items-center justify-center transition-colors ${
+								isActive("/cart")
+									? "text-burnt-accent bg-burnt-accent/10 border-r-2 border-burnt-accent"
+									: "text-burnt-faint hover:text-burnt-text hover:bg-burnt-panel"
+							}`}
+						>
+							<ShoppingCart size={18} strokeWidth={1.75} />
+							{cartCount > 0 && (
+								<span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-burnt-accent" />
+							)}
+						</Link>
+						{token && type === "customer" && (
+							<Link
+								to="/me/deposit"
+								title="Recargar saldo"
+								className={navLinkClass("/me/deposit")}
+							>
+								<CreditCard size={18} strokeWidth={1.75} />
+							</Link>
 						)}
-					</Link>
+					</>
 				)}
 
 				{extraNav.length > 0 && (
@@ -152,20 +163,10 @@ export default function Header({ cartCount }) {
 							}
 							className="flex h-10 w-full items-center justify-center transition-colors hover:bg-burnt-panel"
 						>
-							<div className="flex h-7 w-7 items-center justify-center rounded-full bg-burnt-panel border border-burnt-border text-xs font-semibold text-burnt-text">
+							<div className="flex h-7 w-7 items-center justify-center rounded-md bg-burnt-panel border border-burnt-border text-xs font-semibold text-burnt-text">
 								{(user?.name?.[0] ?? "?").toUpperCase()}
 							</div>
 						</Link>
-
-						{type === "customer" && (
-							<Link
-								to="/me/deposit"
-								title="Recargar saldo"
-								className="flex h-10 w-full items-center justify-center text-burnt-faint transition-colors hover:text-burnt-text hover:bg-burnt-panel"
-							>
-								<CreditCard size={18} strokeWidth={1.75} />
-							</Link>
-						)}
 
 						<button
 							type="button"

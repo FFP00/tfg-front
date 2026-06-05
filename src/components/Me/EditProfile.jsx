@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function EditProfile({ customer, token, onUpdate }) {
@@ -7,11 +7,11 @@ export default function EditProfile({ customer, token, onUpdate }) {
 		name: customer.name ?? "",
 		email: customer.email ?? "",
 		password: "",
+		confirmPassword: "",
 		country_code: customer.country?.code ?? "",
 	});
 	const [loading, setLoading] = useState(false);
 	const [msg, setMsg] = useState(null);
-	const [open, setOpen] = useState(false);
 
 	useEffect(() => {
 		fetch("/api/country/")
@@ -25,8 +25,14 @@ export default function EditProfile({ customer, token, onUpdate }) {
 
 	async function handleSubmit(e) {
 		e.preventDefault();
-		setLoading(true);
 		setMsg(null);
+
+		if (form.password && form.password !== form.confirmPassword) {
+			setMsg({ type: "err", text: "Las contraseñas no coinciden" });
+			return;
+		}
+
+		setLoading(true);
 
 		const body = {};
 		if (form.name !== customer.name) body.name = form.name;
@@ -50,7 +56,7 @@ export default function EditProfile({ customer, token, onUpdate }) {
 		if (res.ok) {
 			localStorage.setItem("burnt_user", JSON.stringify(data));
 			setMsg({ type: "ok", text: "Perfil actualizado correctamente" });
-			setForm({ ...form, password: "" });
+			setForm({ ...form, password: "", confirmPassword: "" });
 			onUpdate();
 		} else {
 			setMsg({ type: "err", text: data.detail ?? "Error al actualizar" });
@@ -60,57 +66,45 @@ export default function EditProfile({ customer, token, onUpdate }) {
 
 	return (
 		<div className="rounded-lg border border-burnt-border bg-burnt-card">
-			<button
-				type="button"
-				onClick={() => setOpen(!open)}
-				className="flex w-full items-center justify-between px-5 py-4 text-left"
-			>
+			<div className="px-5 py-4">
 				<span className="font-semibold text-burnt-text">Editar perfil</span>
-				{open ? (
-					<ChevronUp size={16} strokeWidth={1.75} className="text-burnt-muted" />
-				) : (
-					<ChevronDown size={16} strokeWidth={1.75} className="text-burnt-muted" />
-				)}
-			</button>
+			</div>
 
-			{open && (
-				<form
-					onSubmit={handleSubmit}
-					className="space-y-4 border-t border-burnt-border px-5 pb-5 pt-4"
-				>
-					<div>
-						<label className="mb-1.5 block text-sm text-burnt-muted" htmlFor="name">
-							Nombre de usuario
-						</label>
-						<input
-							id="name"
-							type="text"
-							value={form.name}
-							onChange={handleChange}
-							className="w-full rounded-lg border border-burnt-border bg-burnt-panel px-4 py-2.5 text-sm text-burnt-text focus:border-burnt-accent focus:outline-none"
-						/>
-					</div>
-					<div>
-						<label className="mb-1.5 block text-sm text-burnt-muted" htmlFor="email">
-							Email
-						</label>
-						<input
-							id="email"
-							type="email"
-							value={form.email}
-							onChange={handleChange}
-							className="w-full rounded-lg border border-burnt-border bg-burnt-panel px-4 py-2.5 text-sm text-burnt-text focus:border-burnt-accent focus:outline-none"
-						/>
-					</div>
-					<div>
-						<label className="mb-1.5 block text-sm text-burnt-muted" htmlFor="country_code">
-							País
-						</label>
+			<form onSubmit={handleSubmit} className="space-y-4 border-t border-burnt-border px-5 pb-5 pt-4">
+				<div>
+					<label className="mb-1.5 block text-sm text-burnt-muted" htmlFor="name">
+						Nombre de usuario
+					</label>
+					<input
+						id="name"
+						type="text"
+						value={form.name}
+						onChange={handleChange}
+						className="w-full rounded-lg border border-burnt-border bg-burnt-panel px-4 py-2.5 text-sm text-burnt-text focus:border-burnt-accent focus:outline-none"
+					/>
+				</div>
+				<div>
+					<label className="mb-1.5 block text-sm text-burnt-muted" htmlFor="email">
+						Email
+					</label>
+					<input
+						id="email"
+						type="email"
+						value={form.email}
+						onChange={handleChange}
+						className="w-full rounded-lg border border-burnt-border bg-burnt-panel px-4 py-2.5 text-sm text-burnt-text focus:border-burnt-accent focus:outline-none"
+					/>
+				</div>
+				<div>
+					<label className="mb-1.5 block text-sm text-burnt-muted" htmlFor="country_code">
+						País
+					</label>
+					<div className="relative">
 						<select
 							id="country_code"
 							value={form.country_code}
 							onChange={handleChange}
-							className="w-full rounded-lg border border-burnt-border bg-burnt-panel px-4 py-2.5 text-sm text-burnt-text focus:border-burnt-accent focus:outline-none"
+							className="w-full appearance-none rounded-lg border border-burnt-border bg-burnt-panel py-2.5 pl-4 pr-9 text-sm text-burnt-text focus:border-burnt-accent focus:outline-none"
 						>
 							<option value="">Sin especificar</option>
 							{countries.map((c) => (
@@ -119,42 +113,76 @@ export default function EditProfile({ customer, token, onUpdate }) {
 								</option>
 							))}
 						</select>
-					</div>
-					<div>
-						<label className="mb-1.5 block text-sm text-burnt-muted" htmlFor="password">
-							Nueva contraseña{" "}
-							<span className="text-burnt-faint">(dejar vacío para no cambiar)</span>
-						</label>
-						<input
-							id="password"
-							type="password"
-							value={form.password}
-							onChange={handleChange}
-							autoComplete="new-password"
-							placeholder="••••••••"
-							className="w-full rounded-lg border border-burnt-border bg-burnt-panel px-4 py-2.5 text-sm text-burnt-text placeholder-burnt-faint focus:border-burnt-accent focus:outline-none"
+						<ChevronDown
+							size={14}
+							strokeWidth={1.75}
+							className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-burnt-faint"
 						/>
 					</div>
-					{msg && (
-						<p
-							className={`rounded-lg px-4 py-2.5 text-sm ${
-								msg.type === "ok"
-									? "border border-burnt-green/30 bg-burnt-green/10 text-burnt-green"
-									: "border border-burnt-red/30 bg-burnt-red/10 text-burnt-red"
-							}`}
-						>
-							{msg.text}
-						</p>
-					)}
-					<button
-						type="submit"
-						disabled={loading}
-						className="rounded-lg bg-burnt-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-burnt-accent-hover disabled:opacity-50"
+				</div>
+
+				<div className="border-t border-burnt-border/50 pt-4">
+					<p className="mb-3 text-xs font-semibold uppercase tracking-widest text-burnt-faint">
+						Cambiar contraseña
+					</p>
+					<div className="space-y-3">
+						<div>
+							<label className="mb-1.5 block text-sm text-burnt-muted" htmlFor="password">
+								Nueva contraseña
+							</label>
+							<input
+								id="password"
+								type="password"
+								value={form.password}
+								onChange={handleChange}
+								autoComplete="new-password"
+								placeholder="••••••••"
+								className="w-full rounded-lg border border-burnt-border bg-burnt-panel px-4 py-2.5 text-sm text-burnt-text placeholder-burnt-faint focus:border-burnt-accent focus:outline-none"
+							/>
+						</div>
+						<div>
+							<label className="mb-1.5 block text-sm text-burnt-muted" htmlFor="confirmPassword">
+								Repetir contraseña
+							</label>
+							<input
+								id="confirmPassword"
+								type="password"
+								value={form.confirmPassword}
+								onChange={handleChange}
+								autoComplete="new-password"
+								placeholder="••••••••"
+								className={`w-full rounded-lg border bg-burnt-panel px-4 py-2.5 text-sm text-burnt-text placeholder-burnt-faint focus:outline-none ${
+									form.confirmPassword && form.password !== form.confirmPassword
+										? "border-burnt-red/60 focus:border-burnt-red"
+										: "border-burnt-border focus:border-burnt-accent"
+								}`}
+							/>
+							{form.confirmPassword && form.password !== form.confirmPassword && (
+								<p className="mt-1 text-xs text-burnt-red">Las contraseñas no coinciden</p>
+							)}
+						</div>
+					</div>
+				</div>
+
+				{msg && (
+					<p
+						className={`rounded-lg px-4 py-2.5 text-sm ${
+							msg.type === "ok"
+								? "border border-burnt-green/30 bg-burnt-green/10 text-burnt-green"
+								: "border border-burnt-red/30 bg-burnt-red/10 text-burnt-red"
+						}`}
 					>
-						{loading ? "Guardando..." : "Guardar cambios"}
-					</button>
-				</form>
-			)}
+						{msg.text}
+					</p>
+				)}
+				<button
+					type="submit"
+					disabled={loading}
+					className="rounded-lg bg-burnt-accent px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-burnt-accent-hover disabled:opacity-50"
+				>
+					{loading ? "Guardando..." : "Guardar cambios"}
+				</button>
+			</form>
 		</div>
 	);
 }

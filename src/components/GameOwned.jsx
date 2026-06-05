@@ -1,3 +1,4 @@
+import { Play } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import MediaViewer from "./GameDetail/MediaViewer";
@@ -13,7 +14,6 @@ export default function GameOwned() {
 
 	const token = localStorage.getItem("burnt_token");
 	const type = localStorage.getItem("burnt_type");
-	const user = JSON.parse(localStorage.getItem("burnt_user") ?? "null");
 	const encodedName = name;
 	const decodedName = decodeURIComponent(name);
 
@@ -47,76 +47,48 @@ export default function GameOwned() {
 
 	return (
 		<div className="mx-auto max-w-7xl px-4 py-8">
-			<div className="mb-5 flex items-center gap-3 text-sm text-burnt-muted">
-				<Link to="/me/library" className="transition-colors hover:text-burnt-text">
-					← Biblioteca
-				</Link>
-				<span className="text-burnt-faint">/</span>
-				<span className="text-burnt-text">{decodedName}</span>
-			</div>
-
-			{/* Hero section */}
-			<div className="relative mb-8 overflow-hidden rounded-lg border border-burnt-border">
+			{/* Hero */}
+			<div className="relative mb-8 overflow-hidden rounded-xl border border-burnt-border aspect-460/215">
 				<img
 					src={`/api/title/${encodedName}/media/header`}
 					alt={decodedName}
-					className="h-52 w-full object-cover"
+					className="h-full w-full object-cover"
 					onError={(e) => {
 						e.target.style.display = "none";
 					}}
 				/>
-				<div className="absolute inset-0 bg-linear-to-r from-burnt-bg/95 via-burnt-bg/60 to-transparent" />
-				<div className="absolute inset-0 flex items-end p-6">
-					<div className="flex items-end gap-5">
-						<div className="hidden h-28 w-20 overflow-hidden rounded-md border border-burnt-border shadow-xl sm:block">
-							<img
-								src={`/api/title/${encodedName}/media/capsule`}
-								alt={decodedName}
-								className="h-full w-full object-cover"
-							/>
-						</div>
-						<div>
-							<p className="mb-0.5 text-xs font-semibold uppercase tracking-widest text-burnt-accent">
-								En tu biblioteca
-							</p>
-							<h1 className="mb-1 text-3xl font-bold leading-tight text-white drop-shadow">
-								{decodedName}
-							</h1>
-							{game.developer && (
-								<p className="text-sm text-burnt-muted">
-									por{" "}
-									<Link
-										to={`/developer/${encodeURIComponent(game.developer.name)}`}
-										className="text-burnt-text transition-colors hover:text-burnt-accent"
-									>
-										{game.developer.name}
-									</Link>
-								</p>
-							)}
-						</div>
-					</div>
+				<div className="absolute inset-0 bg-linear-to-t from-burnt-bg via-burnt-bg/55 to-transparent" />
+				<div className="absolute bottom-0 left-0 right-0 p-6">
+					<p className="mb-1 text-xs font-semibold uppercase tracking-widest text-burnt-accent">
+						En tu biblioteca
+					</p>
+					<h1 className="mb-1.5 text-3xl font-bold leading-tight text-white drop-shadow-lg">
+						{decodedName}
+					</h1>
+					{game.developer && (
+						<p className="text-sm text-burnt-muted">
+							por{" "}
+							<Link
+								to={`/developer/${encodeURIComponent(game.developer.name)}`}
+								className="text-burnt-text transition-colors hover:text-burnt-accent"
+							>
+								{game.developer.name}
+							</Link>
+						</p>
+					)}
 				</div>
 			</div>
 
 			<div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
 				{/* Main: media + reviews */}
 				<div className="lg:col-span-2">
-					<MediaViewer
-						encodedName={encodedName}
-						activeMedia={activeMedia}
-						onSelect={setActiveMedia}
-						capsule={`/api/title/${encodedName}/media/capsule`}
-					/>
-
-					<div className="mb-4 flex flex-wrap gap-2">
-						{game.genres.map((g) => (
-							<span
-								key={g.name}
-								className="rounded-full border border-burnt-border bg-burnt-panel px-3 py-1 text-xs font-medium text-burnt-muted"
-							>
-								{g.name}
-							</span>
-						))}
+					<div className="mb-8">
+						<MediaViewer
+							encodedName={encodedName}
+							activeMedia={activeMedia}
+							onSelect={setActiveMedia}
+							capsule={`/api/title/${encodedName}/media/capsule`}
+						/>
 					</div>
 
 					<ReviewList
@@ -124,50 +96,71 @@ export default function GameOwned() {
 						setReviews={setReviews}
 						token={token}
 						encodedName={encodedName}
+						owned={true}
 					/>
 				</div>
 
-				{/* Side panel */}
+				{/* Sidebar */}
 				<div className="space-y-4">
-					{/* Play card */}
+					{/* Info */}
 					<div className="rounded-lg border border-burnt-border bg-burnt-card p-5">
-						<div className="mb-5 text-center">
-							<p className="text-3xl font-bold text-burnt-text">0</p>
-							<p className="text-xs text-burnt-muted">horas en la última semana</p>
-							<p className="mt-1 text-xs text-burnt-faint">
-								Última vez jugado: <span className="text-burnt-muted">Nunca</span>
-							</p>
+						<p className="mb-4 text-xs font-semibold uppercase tracking-widest text-burnt-faint">
+							Información
+						</p>
+						<div className="space-y-4">
+							{game.developer && (
+								<div>
+									<p className="mb-0.5 text-xs text-burnt-faint">Desarrollador</p>
+									<Link
+										to={`/developer/${encodeURIComponent(game.developer.name)}`}
+										className="text-sm text-burnt-text transition-colors hover:text-burnt-accent"
+									>
+										{game.developer.name}
+									</Link>
+								</div>
+							)}
+							{game.release_date && (
+								<div>
+									<p className="mb-0.5 text-xs text-burnt-faint">Lanzamiento</p>
+									<p className="text-sm text-burnt-text">{game.release_date}</p>
+								</div>
+							)}
+							{game.genres?.length > 0 && (
+								<div>
+									<p className="mb-1.5 text-xs text-burnt-faint">Géneros</p>
+									<div className="flex flex-wrap gap-1.5">
+										{game.genres.map((g) => (
+											<span
+												key={g.name}
+												className="rounded-full border border-burnt-border bg-burnt-panel px-2.5 py-0.5 text-xs text-burnt-muted"
+											>
+												{g.name}
+											</span>
+										))}
+									</div>
+								</div>
+							)}
 						</div>
+					</div>
 
+					{/* Play */}
+					<div className="rounded-lg border border-burnt-border bg-burnt-card p-4">
 						{playing ? (
-							<div className="rounded-md border border-burnt-green/30 bg-burnt-green/10 px-4 py-3 text-center text-sm font-semibold text-burnt-green">
-								Lanzando {decodedName}…
+							<div className="flex items-center justify-center gap-2.5 rounded-lg border border-burnt-green/30 bg-burnt-green/10 px-4 py-2.5 text-sm font-semibold text-burnt-green">
+								<span className="h-2 w-2 animate-pulse rounded-full bg-burnt-green" />
+								Lanzando…
 							</div>
 						) : (
 							<button
 								type="button"
 								onClick={() => setPlaying(true)}
-								className="w-full rounded-md bg-burnt-accent py-3 text-center font-bold text-white transition-colors hover:bg-burnt-accent-hover"
+								className="flex w-full items-center justify-center gap-2 rounded-lg bg-burnt-accent py-2.5 font-bold text-white transition-colors hover:bg-burnt-accent-hover"
 							>
+								<Play size={15} strokeWidth={1.75} fill="currentColor" />
 								Jugar
 							</button>
 						)}
-
-						<div className="mt-4 border-t border-burnt-border pt-4">
-							<div className="flex items-center justify-between text-xs text-burnt-muted">
-								<span>Lanzamiento</span>
-								<span className="text-burnt-text">{game.release_date ?? "—"}</span>
-							</div>
-						</div>
 					</div>
-
-					{/* Account info */}
-					{user && (
-						<div className="rounded-lg border border-burnt-border bg-burnt-card p-4 text-xs text-burnt-muted">
-							<p className="mb-1 font-semibold text-burnt-text">{user.name}</p>
-							<p>Juego en tu biblioteca</p>
-						</div>
-					)}
 				</div>
 			</div>
 		</div>

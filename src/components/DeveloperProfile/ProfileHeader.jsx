@@ -20,7 +20,7 @@ export default function ProfileHeader({ developer }) {
 				<div className="absolute inset-x-0 bottom-0 h-16 bg-linear-to-t from-burnt-card to-transparent" />
 			</div>
 			<div className="px-6 pb-6">
-				<div className="relative z-10 -mt-10 mb-4 h-20 w-20 overflow-hidden rounded-full border-4 border-burnt-card">
+				<div className="relative z-10 -mt-10 mb-4 h-20 w-20 overflow-hidden rounded-md border-4 border-burnt-card">
 					<AvatarImage
 						src={`/api/developer/${developer.name}/image/profile`}
 						alt={developer.name}

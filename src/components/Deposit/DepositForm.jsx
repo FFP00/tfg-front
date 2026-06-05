@@ -157,7 +157,6 @@ export default function DepositForm({ token, onSuccess }) {
 				<p>
 					Número: <span className="font-mono text-burnt-text">4242 4242 4242 4242</span>
 				</p>
-				<p>Fecha: cualquier fecha futura · CVC: cualquier 3 dígitos</p>
 			</div>
 		</div>
 	);

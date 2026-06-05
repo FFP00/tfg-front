@@ -79,19 +79,24 @@ export default function App() {
 		setCart([]);
 	}
 
+	const isDeveloper = localStorage.getItem("burnt_type") === "developer";
+	const cartProps = isDeveloper
+		? {}
+		: { cart, addToCart, removeFromCart };
+
 	return (
 		<BrowserRouter>
 			<div className="flex min-h-screen bg-burnt-bg text-burnt-text">
-				<Header cartCount={cart.length} />
+				<Header cartCount={isDeveloper ? 0 : cart.length} />
 
 				<div className="ml-16 flex flex-1 flex-col">
 					<main className="flex-1">
 						<Routes>
 							<Route path="*" element={<Navigate replace to="/" />} />
-							<Route path="/" element={<Home cart={cart} addToCart={addToCart} removeFromCart={removeFromCart} />} />
+							<Route path="/" element={<Home {...cartProps} />} />
 							<Route
 								path="/game/:name"
-								element={<GameDetail cart={cart} addToCart={addToCart} removeFromCart={removeFromCart} />}
+								element={<GameDetail {...cartProps} />}
 							/>
 							<Route path="/login" element={<Login />} />
 							<Route path="/register" element={<Register />} />

@@ -60,7 +60,7 @@ export default function ProfileCard({ customer, token, onUpdate }) {
 			<div className="px-6 pb-6">
 				<button
 					type="button"
-					className="group relative -mt-10 mb-4 h-20 w-20 cursor-pointer overflow-hidden rounded-full border-4 border-burnt-card"
+					className="group relative -mt-10 mb-4 h-20 w-20 cursor-pointer overflow-hidden rounded-md border-4 border-burnt-card"
 					onClick={() => profileRef.current?.click()}
 				>
 					<AvatarImage

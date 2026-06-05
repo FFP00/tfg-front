@@ -55,7 +55,7 @@ export default function DeveloperSearch() {
 							to={`/developer/${encodeURIComponent(dev.name)}`}
 							className="flex items-center gap-4 rounded-md border border-burnt-border bg-burnt-card p-4 transition-all hover:border-burnt-accent/50"
 						>
-							<div className="h-10 w-10 flex-none overflow-hidden rounded-full">
+							<div className="h-10 w-10 flex-none overflow-hidden rounded-md">
 								<AvatarImage
 									src={`/api/developer/${encodeURIComponent(dev.name)}/image/profile`}
 									alt={dev.name}

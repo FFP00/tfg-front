@@ -104,7 +104,7 @@ export default function CommunitySearch() {
 							}
 							className="flex items-center gap-4 rounded-md border border-burnt-border bg-burnt-card p-4 transition-all hover:border-burnt-accent/50 hover:bg-burnt-panel"
 						>
-							<div className="h-10 w-10 flex-none overflow-hidden rounded-full">
+							<div className="h-10 w-10 flex-none overflow-hidden rounded-md">
 								<AvatarImage
 									src={`/api/${tab === "players" ? "customer" : "developer"}/${encodeURIComponent(item.name)}/image/profile`}
 									alt={item.name}

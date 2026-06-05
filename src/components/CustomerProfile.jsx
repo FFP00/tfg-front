@@ -125,7 +125,7 @@ export default function CustomerProfile() {
 											to={`/customer/${f.name}`}
 											className="flex items-center gap-3 rounded-md border border-burnt-border p-3 transition-colors hover:border-burnt-accent/50"
 										>
-											<div className="h-8 w-8 flex-none overflow-hidden rounded-full">
+											<div className="h-8 w-8 flex-none overflow-hidden rounded-md">
 												<AvatarImage
 													src={`/api/customer/${f.name}/image/profile`}
 													alt={f.name}

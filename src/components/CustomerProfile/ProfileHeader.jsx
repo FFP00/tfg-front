@@ -12,7 +12,7 @@ export default function ProfileHeader({ customer }) {
 
 			{/* Info */}
 			<div className="px-5 pb-5">
-				<div className="relative z-10 -mt-10 mb-3 h-20 w-20 overflow-hidden rounded-full border-4 border-burnt-card">
+				<div className="relative z-10 -mt-10 mb-3 h-20 w-20 overflow-hidden rounded-md border-4 border-burnt-card">
 					<AvatarImage
 						src={`/api/customer/${customer.name}/image/profile`}
 						alt={customer.name}
