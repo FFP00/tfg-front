@@ -1,7 +1,8 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import ProfileHeader from "./DeveloperProfile/ProfileHeader";
-import TitlesList from "./DeveloperProfile/TitlesList";
+import ProfileHeader from "./DeveloperProfile/ProfileHeader.jsx";
+import TitlesList from "./DeveloperProfile/TitlesList.jsx";
 
 export default function DeveloperProfile() {
 	const { name } = useParams();
@@ -13,16 +14,17 @@ export default function DeveloperProfile() {
 
 	useEffect(() => {
 		async function load() {
-			const [devRes, titlesRes] = await Promise.all([
-				fetch(`/api/developer/${name}`),
-				fetch(`/api/title/?developer=${encodeURIComponent(name)}`),
-			]);
-			if (!devRes.ok) {
+			try {
+				const [devRes, titlesRes] = await Promise.all([
+					axios.get(`/api/developer/${name}`),
+					axios.get(`/api/title/?developer=${encodeURIComponent(name)}`).catch(() => ({ data: [] }))
+				]);
+				setDeveloper(devRes.data);
+				setTitles(titlesRes.data);
+			} catch {
 				navigate("/");
 				return;
 			}
-			setDeveloper(await devRes.json());
-			if (titlesRes.ok) setTitles(await titlesRes.json());
 			setLoading(false);
 		}
 		load();
@@ -38,12 +40,12 @@ export default function DeveloperProfile() {
 
 	return (
 		<div className="mx-auto max-w-7xl px-4 py-8">
-			<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-				<div className="lg:col-span-1">
+			<div className="grid grid-cols-3 gap-6">
+				<div className="col-span-1">
 					<ProfileHeader developer={developer} />
 				</div>
 
-				<div className="lg:col-span-2">
+				<div className="col-span-2">
 					<div className="rounded-lg border border-burnt-border bg-burnt-card p-5">
 						<h2 className="mb-5 text-lg font-bold text-burnt-text">
 							Títulos publicados{" "}

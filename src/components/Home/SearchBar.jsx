@@ -14,7 +14,7 @@ export default function SearchBar({ search, onSearch, genres, selectedGenre, onG
 				<select
 					value={selectedGenre}
 					onChange={(e) => onGenreChange(e.target.value)}
-					className="appearance-none rounded-md border border-burnt-border bg-burnt-panel pl-4 pr-9 py-2.5 text-sm text-burnt-text focus:border-burnt-accent focus:outline-none"
+					className="appearance-none rounded-md border border-burnt-border bg-burnt-panel py-2.5 pl-4 pr-9 text-sm text-burnt-text focus:border-burnt-accent focus:outline-none"
 				>
 					<option value="">Todos los géneros</option>
 					{genres.map((g) => (

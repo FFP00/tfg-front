@@ -1,6 +1,7 @@
+import axios from "axios";
 import { ArrowUp, Pencil, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useState } from "react";
-import AvatarImage from "../ui/AvatarImage";
+import AvatarImage from "../ui/AvatarImage.jsx";
 
 export default function ReviewList({ reviews: rawReviews, setReviews, token, encodedName, owned }) {
 	const reviews = [...rawReviews].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -17,27 +18,16 @@ export default function ReviewList({ reviews: rawReviews, setReviews, token, enc
 		if (!token || voted.has(customerName)) return;
 		setVoteErrors((prev) => ({ ...prev, [customerName]: null }));
 		try {
-			const res = await fetch(`/api/title/${encodedName}/reviews/${customerName}/vote`, {
-				method: "POST",
-				headers: { Authorization: `Bearer ${token}` },
+			const res = await axios.post(`/api/title/${encodedName}/reviews/${customerName}/vote`, null, {
+				headers: { Authorization: `Bearer ${token}` }
 			});
-			if (res.ok) {
-				const { votes } = await res.json();
-				setReviews((prev) =>
-					prev.map((r) => (r.customer_name === customerName ? { ...r, votes } : r)),
-				);
-				setVoted((prev) => new Set(prev).add(customerName));
-			} else {
-				const data = await res.json();
-				setVoteErrors((prev) => ({
-					...prev,
-					[customerName]: data.detail ?? "No puedes votar esta reseña",
-				}));
-			}
-		} catch {
+			const { votes } = res.data;
+			setReviews((prev) => prev.map((r) => (r.customer_name === customerName ? { ...r, votes } : r)));
+			setVoted((prev) => new Set(prev).add(customerName));
+		} catch (error) {
 			setVoteErrors((prev) => ({
 				...prev,
-				[customerName]: "Error de conexión",
+				[customerName]: error.response?.data?.detail ?? "No puedes votar esta reseña"
 			}));
 		}
 	}
@@ -47,21 +37,16 @@ export default function ReviewList({ reviews: rawReviews, setReviews, token, enc
 		setSending(true);
 		setMsg(null);
 		try {
-			const res = await fetch(`/api/title/${encodedName}/reviews`, {
-				method: "POST",
-				headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-				body: JSON.stringify(form),
+			const res = await axios.post(`/api/title/${encodedName}/reviews`, form, {
+				headers: { Authorization: `Bearer ${token}` }
 			});
-			const data = await res.json();
 			if (res.status === 201) {
 				setMsg({ type: "ok", text: "Reseña enviada. Pendiente de aprobación." });
 				setShowForm(false);
 				setForm({ content: "", recommends: true });
-			} else {
-				setMsg({ type: "err", text: data.detail ?? "Error al enviar la reseña" });
 			}
-		} catch {
-			setMsg({ type: "err", text: "Error de conexión. Inténtalo de nuevo." });
+		} catch (error) {
+			setMsg({ type: "err", text: error.response?.data?.detail ?? "Error al enviar la reseña" });
 		}
 		setSending(false);
 	}
@@ -194,9 +179,7 @@ export default function ReviewList({ reviews: rawReviews, setReviews, token, enc
 											/>
 										</div>
 										<div>
-											<p className="text-sm font-semibold leading-tight text-burnt-text">
-												{r.customer_name}
-											</p>
+											<p className="text-sm font-semibold leading-tight text-burnt-text">{r.customer_name}</p>
 											<p className="text-xs text-burnt-faint">
 												{new Date(r.created_at).toLocaleDateString("es-ES")}
 											</p>
@@ -204,9 +187,7 @@ export default function ReviewList({ reviews: rawReviews, setReviews, token, enc
 									</div>
 									<span
 										className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${
-											r.recommends
-												? "bg-burnt-green/15 text-burnt-green"
-												: "bg-burnt-red/15 text-burnt-red"
+											r.recommends ? "bg-burnt-green/15 text-burnt-green" : "bg-burnt-red/15 text-burnt-red"
 										}`}
 									>
 										{r.recommends ? (

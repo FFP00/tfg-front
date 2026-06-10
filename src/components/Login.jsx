@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -26,19 +27,15 @@ export default function Login() {
 		e.preventDefault();
 		setLoading(true);
 		setError(null);
-
-		const body = new URLSearchParams({ username: form.username, password: form.password });
-		const res = await fetch(`/auth/${tab}/login`, {
-			method: "POST",
-			body,
-		});
-
-		if (res.status === 202) {
-			setEmail(form.username);
-			setStep(2);
-		} else {
-			const data = await res.json();
-			setError(data.detail ?? "Error al iniciar sesión");
+		try {
+			const body = new URLSearchParams({ username: form.username, password: form.password });
+			const res = await axios.post(`/auth/${tab}/login`, body);
+			if (res.status === 202) {
+				setEmail(form.username);
+				setStep(2);
+			}
+		} catch (error) {
+			setError(error.response?.data?.detail ?? "Error al iniciar sesión");
 		}
 		setLoading(false);
 	}
@@ -47,18 +44,11 @@ export default function Login() {
 		e.preventDefault();
 		setLoading(true);
 		setError(null);
-
-		const res = await fetch(`/auth/${tab}/verify`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ email, code }),
-		});
-		const data = await res.json();
-
-		if (res.ok) {
+		try {
+			const res = await axios.post(`/auth/${tab}/verify`, { email, code });
+			const data = res.data;
 			localStorage.setItem("burnt_token", data.access_token);
 			localStorage.setItem("burnt_type", tab);
-
 			if (tab === "customer") {
 				localStorage.setItem("burnt_user", JSON.stringify(data.customer));
 				if (data.wallet) {
@@ -67,11 +57,10 @@ export default function Login() {
 			} else {
 				localStorage.setItem("burnt_user", JSON.stringify(data.developer));
 			}
-
 			navigate(tab === "developer" ? "/dashboard" : "/");
-		} else {
-			setError(data.detail ?? "Código incorrecto. Vuelve a iniciar sesión.");
-			if (res.status === 400) {
+		} catch (error) {
+			setError(error.response?.data?.detail ?? "Código incorrecto. Vuelve a iniciar sesión.");
+			if (error.response?.status === 400) {
 				setStep(1);
 				setCode("");
 			}
@@ -170,9 +159,7 @@ export default function Login() {
 									placeholder="————"
 									className="w-full rounded-lg border border-burnt-border bg-burnt-panel px-4 py-2.5 text-center text-xl font-bold tracking-[0.5em] text-burnt-text placeholder-burnt-faint focus:border-burnt-accent focus:outline-none"
 								/>
-								<p className="mt-1 text-xs text-burnt-faint">
-									El código es insensible a mayúsculas
-								</p>
+								<p className="mt-1 text-xs text-burnt-faint">El código es insensible a mayúsculas</p>
 							</div>
 							{error && (
 								<p className="rounded-lg border border-burnt-red/30 bg-burnt-red/10 px-4 py-2.5 text-sm text-burnt-red">

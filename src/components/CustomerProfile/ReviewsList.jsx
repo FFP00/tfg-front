@@ -16,7 +16,7 @@ export default function ReviewsList({ reviews }) {
 					<div className="mb-2 flex items-start justify-between gap-2">
 						{r.title_name && (
 							<Link
-								to={`/game/${encodeURIComponent(r.title_name)}`}
+								to={`/shop/${encodeURIComponent(r.title_name)}`}
 								className="text-sm font-semibold text-burnt-accent transition-colors hover:text-burnt-accent-hover"
 							>
 								{r.title_name}
@@ -24,9 +24,7 @@ export default function ReviewsList({ reviews }) {
 						)}
 						<span
 							className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
-								r.recommends
-									? "bg-burnt-green/15 text-burnt-green"
-									: "bg-burnt-red/15 text-burnt-red"
+								r.recommends ? "bg-burnt-green/15 text-burnt-green" : "bg-burnt-red/15 text-burnt-red"
 							}`}
 						>
 							{r.recommends ? (

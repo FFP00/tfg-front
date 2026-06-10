@@ -1,7 +1,8 @@
+import axios from "axios";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import MediaImage from "./ui/MediaImage";
+import MediaImage from "./ui/MediaImage.jsx";
 
 export default function Library() {
 	const navigate = useNavigate();
@@ -16,6 +17,7 @@ export default function Library() {
 	const [selectedGenre, setSelectedGenre] = useState("");
 	const [loading, setLoading] = useState(true);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: mount-only auth redirect
 	useEffect(() => {
 		if (!token || type !== "customer") {
 			navigate("/login");
@@ -27,29 +29,33 @@ export default function Library() {
 			return;
 		}
 		async function load() {
-			const libRes = await fetch(`/api/customer/${encodeURIComponent(name)}/library`);
-			const libData = libRes.ok ? await libRes.json() : [];
-			setLibrary(libData);
+			try {
+				const libRes = await axios.get(`/api/customer/${encodeURIComponent(name)}/library`);
+				const libData = libRes.data;
+				setLibrary(libData);
 
-			if (libData.length > 0) {
-				const details = await Promise.all(
-					libData.map((t) =>
-						fetch(`/api/title/${encodeURIComponent(t.name)}`)
-							.then((r) => (r.ok ? r.json() : null))
-							.catch(() => null),
-					),
-				);
-				const map = {};
-				details.forEach((d) => {
-					if (d) map[d.name] = d;
-				});
-				setTitleDetails(map);
+				if (libData.length > 0) {
+					const details = await Promise.all(
+						libData.map((t) =>
+							axios
+								.get(`/api/title/${encodeURIComponent(t.name)}`)
+								.then((r) => r.data)
+								.catch(() => null)
+						)
+					);
+					const map = {};
+					for (const d of details) {
+						if (d) map[d.name] = d;
+					}
+					setTitleDetails(map);
+				}
+			} catch (error) {
+				console.error(error);
 			}
 			setLoading(false);
 		}
 		load();
-	}, [token, type, user?.name, navigate]);
-
+	}, []);
 
 	const filtered = library
 		.filter((t) => !search || t.name.toLowerCase().includes(search.toLowerCase()))
@@ -121,11 +127,11 @@ export default function Library() {
 							</p>
 						</div>
 					) : (
-						<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+						<div className="grid grid-cols-4 gap-3">
 							{filtered.map((t) => (
 								<Link
 									key={t.name}
-									to={`/game/${encodeURIComponent(t.name)}/owned`}
+									to={`/library/${encodeURIComponent(t.name)}`}
 									className="group flex flex-col overflow-hidden rounded-md border border-burnt-border bg-burnt-card transition-all hover:border-burnt-accent/50 hover:shadow-lg hover:shadow-burnt-accent/5"
 								>
 									<div className="aspect-2/3 overflow-hidden bg-burnt-panel">

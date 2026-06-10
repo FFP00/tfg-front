@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
@@ -20,35 +21,24 @@ export default function DepositSuccess() {
 			return;
 		}
 		if (!sessionId) {
-			navigate("/me/deposit");
+			navigate("/deposit");
 			return;
 		}
 		async function verify() {
-			let res;
-			let data;
 			try {
-				res = await fetch(`/api/stripe/success?session_id=${sessionId}`, {
-					headers: { Authorization: `Bearer ${token}` },
+				const res = await axios.get(`/api/stripe/success?session_id=${sessionId}`, {
+					headers: { Authorization: `Bearer ${token}` }
 				});
-				data = await res.json();
-			} catch {
-				setError("Error de conexión con el servidor (500). Comprueba los logs del backend.");
-				setStatus("error");
-				return;
-			}
-			if (res.ok) {
+				const data = res.data;
 				setWallet(data);
 				localStorage.setItem("burnt_wallet", JSON.stringify(data));
 				setStatus("ok");
 				if (window.opener) {
-					window.opener.postMessage(
-						{ type: "stripe_success", wallet: data },
-						window.location.origin,
-					);
+					window.opener.postMessage({ type: "stripe_success", wallet: data }, window.location.origin);
 					setTimeout(() => window.close(), 1200);
 				}
-			} else {
-				setError(data.detail ?? `Error ${res.status} al verificar el pago`);
+			} catch (err) {
+				setError(err.response?.data?.detail ?? "Error al verificar el pago");
 				setStatus("error");
 			}
 		}
@@ -87,7 +77,7 @@ export default function DepositSuccess() {
 								Catálogo
 							</Link>
 							<Link
-								to="/me"
+								to="/profile"
 								className="flex-1 rounded-md bg-burnt-accent py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-burnt-accent-hover"
 							>
 								Mi cuenta
@@ -102,7 +92,7 @@ export default function DepositSuccess() {
 						<h1 className="mb-2 text-2xl font-bold text-burnt-red">Error en el pago</h1>
 						<p className="mb-6 text-sm text-burnt-muted">{error}</p>
 						<Link
-							to="/me/deposit"
+							to="/deposit"
 							className="block w-full rounded-md bg-burnt-accent py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-burnt-accent-hover"
 						>
 							Intentar de nuevo

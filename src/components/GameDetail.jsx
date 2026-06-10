@@ -1,8 +1,9 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import MediaViewer from "./GameDetail/MediaViewer";
-import PurchaseCard from "./GameDetail/PurchaseCard";
-import ReviewList from "./GameDetail/ReviewList";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import MediaViewer from "./GameDetail/MediaViewer.jsx";
+import PurchaseCard from "./GameDetail/PurchaseCard.jsx";
+import ReviewList from "./GameDetail/ReviewList.jsx";
 
 export default function GameDetail({ cart, addToCart, removeFromCart }) {
 	const { name } = useParams();
@@ -19,16 +20,16 @@ export default function GameDetail({ cart, addToCart, removeFromCart }) {
 
 	useEffect(() => {
 		async function load() {
-			const [gameRes, reviewsRes] = await Promise.all([
-				fetch(`/api/title/${name}`),
-				fetch(`/api/title/${name}/reviews`),
-			]);
-			if (!gameRes.ok) {
+			try {
+				const [gameRes, reviewsRes] = await Promise.all([
+					axios.get(`/api/title/${name}`),
+					axios.get(`/api/title/${name}/reviews`)
+				]);
+				setGame(gameRes.data);
+				setReviews(reviewsRes.data);
+			} catch {
 				navigate("/");
-				return;
 			}
-			setGame(await gameRes.json());
-			if (reviewsRes.ok) setReviews(await reviewsRes.json());
 		}
 		load();
 	}, [name, navigate]);
@@ -37,10 +38,15 @@ export default function GameDetail({ cart, addToCart, removeFromCart }) {
 		if (type !== "customer" || !token) return;
 		const user = JSON.parse(localStorage.getItem("burnt_user") ?? "null");
 		if (!user?.name) return;
-		fetch(`/api/customer/${encodeURIComponent(user.name)}/library`)
-			.then((r) => (r.ok ? r.json() : []))
-			.then((lib) => setOwned(lib.some((t) => t.name === decodeURIComponent(name))))
-			.catch(() => {});
+		async function checkOwned() {
+			try {
+				const res = await axios.get(`/api/customer/${encodeURIComponent(user.name)}/library`);
+				setOwned(res.data.some((t) => t.name === decodeURIComponent(name)));
+			} catch {
+				// ignore
+			}
+		}
+		checkOwned();
 	}, [token, type, name]);
 
 	if (!game) {
@@ -65,7 +71,6 @@ export default function GameDetail({ cart, addToCart, removeFromCart }) {
 				/>
 			</div>
 
-			{/* Título a la izquierda, botón carrito a la derecha */}
 			<div className="mb-4 flex items-center justify-between gap-4">
 				<h1 className="text-3xl font-bold text-burnt-text">{decodedName}</h1>
 				<PurchaseCard
@@ -93,12 +98,12 @@ export default function GameDetail({ cart, addToCart, removeFromCart }) {
 				<span>
 					Desarrollador:{" "}
 					{game.developer ? (
-						<a
-							href={`/developer/${encodeURIComponent(game.developer.name)}`}
+						<Link
+							to={`/developer/${encodeURIComponent(game.developer.name)}`}
 							className="text-burnt-accent transition-colors hover:text-burnt-accent-hover"
 						>
 							{game.developer.name}
-						</a>
+						</Link>
 					) : (
 						<span className="text-burnt-text">—</span>
 					)}

@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
 	BookOpen,
 	ClipboardList,
@@ -11,22 +12,9 @@ import {
 	Mail,
 	ShoppingCart,
 	UserPlus,
-	Users,
+	Users
 } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-
-const NAV_MAIN = [{ to: "/", Icon: Home, label: "Tienda" }];
-
-const NAV_COMMUNITY = [{ to: "/search/community", Icon: Users, label: "Comunidad" }];
-
-const NAV_INFO_PUBLIC = [
-	{ to: "/about", Icon: Info, label: "Nosotros" },
-	{ to: "/faq", Icon: HelpCircle, label: "FAQ" },
-];
-
-const NAV_INFO_AUTH = [
-	{ to: "/contact", Icon: Mail, label: "Contacto" },
-];
 
 export default function Header({ cartCount }) {
 	const navigate = useNavigate();
@@ -39,10 +27,11 @@ export default function Header({ cartCount }) {
 
 	async function handleLogout() {
 		if (token && type) {
-			await fetch(`/auth/${type}/logout`, {
-				method: "POST",
-				headers: { Authorization: `Bearer ${token}` },
-			}).catch(() => {});
+			await axios
+				.post(`/auth/${type}/logout`, null, {
+					headers: { Authorization: `Bearer ${token}` }
+				})
+				.catch(() => {});
 		}
 		localStorage.removeItem("burnt_token");
 		localStorage.removeItem("burnt_type");
@@ -51,21 +40,8 @@ export default function Header({ cartCount }) {
 		navigate("/");
 	}
 
-	function isActive(path) {
-		return location.pathname === path;
-	}
-
-	const navCustomer = [
-		{ to: "/me/library", Icon: BookOpen, label: "Biblioteca" },
-		{ to: "/me/history", Icon: ClipboardList, label: "Historial" },
-	];
-
-	const navDeveloper = [{ to: "/dashboard", Icon: LayoutGrid, label: "Dashboard" }];
-
-	const extraNav = token ? (type === "customer" ? navCustomer : navDeveloper) : [];
-
 	function navLinkClass(to) {
-		const active = isActive(to);
+		const active = location.pathname === to;
 		return `flex h-10 w-full items-center justify-center transition-colors ${
 			active
 				? "text-burnt-accent bg-burnt-accent/10 border-r-2 border-burnt-accent"
@@ -79,7 +55,6 @@ export default function Header({ cartCount }) {
 
 	return (
 		<aside className="fixed left-0 top-0 z-50 flex h-screen w-16 flex-col border-r border-burnt-border bg-burnt-card">
-			{/* Logo */}
 			<Link
 				to="/"
 				className="flex h-14 w-full items-center justify-center border-b border-burnt-border"
@@ -88,13 +63,10 @@ export default function Header({ cartCount }) {
 				<span className="text-sm font-black tracking-widest text-burnt-accent">B</span>
 			</Link>
 
-			{/* Navigation */}
 			<nav className="flex flex-1 flex-col overflow-y-auto py-2">
-				{NAV_MAIN.map(({ to, Icon, label }) => (
-					<Link key={to} to={to} title={label} className={navLinkClass(to)}>
-						<Icon size={18} strokeWidth={1.75} />
-					</Link>
-				))}
+				<Link to="/" title="Tienda" className={navLinkClass("/")}>
+					<Home size={18} strokeWidth={1.75} />
+				</Link>
 
 				{type !== "developer" && (
 					<>
@@ -102,7 +74,7 @@ export default function Header({ cartCount }) {
 							to="/cart"
 							title={cartCount > 0 ? `Carrito (${cartCount})` : "Carrito"}
 							className={`relative flex h-10 w-full items-center justify-center transition-colors ${
-								isActive("/cart")
+								location.pathname === "/cart"
 									? "text-burnt-accent bg-burnt-accent/10 border-r-2 border-burnt-accent"
 									: "text-burnt-faint hover:text-burnt-text hover:bg-burnt-panel"
 							}`}
@@ -113,49 +85,57 @@ export default function Header({ cartCount }) {
 							)}
 						</Link>
 						{token && type === "customer" && (
-							<Link
-								to="/me/deposit"
-								title="Recargar saldo"
-								className={navLinkClass("/me/deposit")}
-							>
+							<Link to="/deposit" title="Recargar saldo" className={navLinkClass("/deposit")}>
 								<CreditCard size={18} strokeWidth={1.75} />
 							</Link>
 						)}
 					</>
 				)}
 
-				{extraNav.length > 0 && (
+				{token && (
 					<>
 						<Divider />
-						{extraNav.map(({ to, Icon, label }) => (
-							<Link key={to} to={to} title={label} className={navLinkClass(to)}>
-								<Icon size={18} strokeWidth={1.75} />
+						{type === "customer" ? (
+							<>
+								<Link to="/library" title="Biblioteca" className={navLinkClass("/library")}>
+									<BookOpen size={18} strokeWidth={1.75} />
+								</Link>
+								<Link to="/history" title="Historial" className={navLinkClass("/history")}>
+									<ClipboardList size={18} strokeWidth={1.75} />
+								</Link>
+							</>
+						) : (
+							<Link to="/dashboard" title="Dashboard" className={navLinkClass("/dashboard")}>
+								<LayoutGrid size={18} strokeWidth={1.75} />
 							</Link>
-						))}
+						)}
 					</>
 				)}
 
 				<Divider />
-				{NAV_COMMUNITY.map(({ to, Icon, label }) => (
-					<Link key={to} to={to} title={label} className={navLinkClass(to)}>
-						<Icon size={18} strokeWidth={1.75} />
-					</Link>
-				))}
+				<Link to="/community" title="Comunidad" className={navLinkClass("/community")}>
+					<Users size={18} strokeWidth={1.75} />
+				</Link>
 
 				<Divider />
-				{[...NAV_INFO_PUBLIC, ...(token ? NAV_INFO_AUTH : [])].map(({ to, Icon, label }) => (
-					<Link key={to} to={to} title={label} className={navLinkClass(to)}>
-						<Icon size={18} strokeWidth={1.75} />
+				<Link to="/about" title="Nosotros" className={navLinkClass("/about")}>
+					<Info size={18} strokeWidth={1.75} />
+				</Link>
+				<Link to="/faq" title="FAQ" className={navLinkClass("/faq")}>
+					<HelpCircle size={18} strokeWidth={1.75} />
+				</Link>
+				{token && (
+					<Link to="/contact" title="Contacto" className={navLinkClass("/contact")}>
+						<Mail size={18} strokeWidth={1.75} />
 					</Link>
-				))}
+				)}
 			</nav>
 
-			{/* Account section */}
 			<div className="border-t border-burnt-border py-2">
 				{token ? (
 					<>
 						<Link
-							to={type === "customer" ? "/me" : "/dashboard"}
+							to={type === "customer" ? "/profile" : "/dashboard"}
 							title={
 								type === "customer" && wallet
 									? `${user?.name ?? "Cuenta"} · $${parseFloat(wallet.balance).toFixed(2)}`
@@ -163,7 +143,7 @@ export default function Header({ cartCount }) {
 							}
 							className="flex h-10 w-full items-center justify-center transition-colors hover:bg-burnt-panel"
 						>
-							<div className="flex h-7 w-7 items-center justify-center rounded-md bg-burnt-panel border border-burnt-border text-xs font-semibold text-burnt-text">
+							<div className="flex h-7 w-7 items-center justify-center rounded-md border border-burnt-border bg-burnt-panel text-xs font-semibold text-burnt-text">
 								{(user?.name?.[0] ?? "?").toUpperCase()}
 							</div>
 						</Link>

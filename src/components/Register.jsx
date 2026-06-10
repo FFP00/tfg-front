@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -12,15 +13,21 @@ export default function Register() {
 		password_confirm: "",
 		country_code: "",
 		support_email: "",
-		website_url: "",
+		website_url: ""
 	});
 	const [error, setError] = useState(null);
 	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
-		fetch("/api/country/")
-			.then((r) => r.json())
-			.then(setCountries);
+		async function fetchData() {
+			try {
+				const res = await axios.get("/api/country/");
+				setCountries(res.data);
+			} catch (error) {
+				console.error(error);
+			}
+		}
+		fetchData();
 	}, []);
 
 	function handleChange(e) {
@@ -49,7 +56,7 @@ export default function Register() {
 						name: form.name,
 						email: form.email,
 						password: form.password,
-						country_code: form.country_code,
+						country_code: form.country_code
 					}
 				: {
 						name: form.name,
@@ -57,20 +64,14 @@ export default function Register() {
 						password: form.password,
 						support_email: form.support_email,
 						country_code: form.country_code,
-						website_url: form.website_url || null,
+						website_url: form.website_url || null
 					};
 
-		const res = await fetch(`/auth/${tab}/register`, {
-			method: "POST",
-			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify(body),
-		});
-
-		if (res.status === 201) {
+		try {
+			await axios.post(`/auth/${tab}/register`, body);
 			navigate("/login");
-		} else {
-			const data = await res.json();
-			setError(data.detail ?? "Error al registrarse");
+		} catch (error) {
+			setError(error.response?.data?.detail ?? "Error al registrarse");
 		}
 		setLoading(false);
 	}
@@ -102,7 +103,6 @@ export default function Register() {
 
 				<div className="rounded-md border border-burnt-border bg-burnt-card p-6 shadow-xl shadow-black/30">
 					<form onSubmit={handleSubmit} className="space-y-4">
-						{/* 1. Nombre */}
 						<div>
 							<label className="mb-1.5 block text-sm text-burnt-muted" htmlFor="name">
 								{tab === "customer" ? "Nombre de usuario" : "Nombre del estudio"}
@@ -118,7 +118,6 @@ export default function Register() {
 							/>
 						</div>
 
-						{/* 2. Email principal */}
 						<div>
 							<label className="mb-1.5 block text-sm text-burnt-muted" htmlFor="email">
 								{tab === "customer" ? "Correo electrónico" : "Correo electrónico (acceso privado)"}
@@ -134,7 +133,6 @@ export default function Register() {
 							/>
 						</div>
 
-						{/* 3. Contraseña */}
 						<div>
 							<label className="mb-1.5 block text-sm text-burnt-muted" htmlFor="password">
 								Contraseña
@@ -151,7 +149,6 @@ export default function Register() {
 							/>
 						</div>
 
-						{/* 4. Confirmar contraseña + info requisitos */}
 						<div>
 							<label className="mb-1.5 block text-sm text-burnt-muted" htmlFor="password_confirm">
 								Confirmar contraseña
@@ -179,7 +176,6 @@ export default function Register() {
 							)}
 						</div>
 
-						{/* 5. País */}
 						<div>
 							<label className="mb-1.5 block text-sm text-burnt-muted" htmlFor="country_code">
 								País
@@ -200,7 +196,6 @@ export default function Register() {
 							</select>
 						</div>
 
-						{/* 6. Campos específicos del desarrollador */}
 						{tab === "developer" && (
 							<>
 								<div>

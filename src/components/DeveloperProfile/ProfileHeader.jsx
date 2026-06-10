@@ -1,5 +1,5 @@
 import { useState } from "react";
-import AvatarImage from "../ui/AvatarImage";
+import AvatarImage from "../ui/AvatarImage.jsx";
 
 export default function ProfileHeader({ developer }) {
 	const [bannerError, setBannerError] = useState(false);
@@ -51,7 +51,7 @@ export default function ProfileHeader({ developer }) {
 					{developer.created_at
 						? new Date(developer.created_at).toLocaleDateString("es-ES", {
 								year: "numeric",
-								month: "long",
+								month: "long"
 							})
 						: "—"}
 				</p>

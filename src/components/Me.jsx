@@ -1,10 +1,11 @@
+import axios from "axios";
 import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import EditProfile from "./Me/EditProfile";
-import FriendsCard from "./Me/FriendsCard";
-import ProfileCard from "./Me/ProfileCard";
-import WalletCard from "./Me/WalletCard";
+import EditProfile from "./Me/EditProfile.jsx";
+import FriendsCard from "./Me/FriendsCard.jsx";
+import ProfileCard from "./Me/ProfileCard.jsx";
+import WalletCard from "./Me/WalletCard.jsx";
 
 export default function Me() {
 	const navigate = useNavigate();
@@ -19,34 +20,35 @@ export default function Me() {
 
 	async function handleDeactivate() {
 		setDeactivating(true);
-		const res = await fetch("/api/customer/me", {
-			method: "DELETE",
-			headers: { Authorization: `Bearer ${token}` },
-		});
-		if (res.status === 204) {
+		try {
+			await axios.delete("/api/customer/me", {
+				headers: { Authorization: `Bearer ${token}` }
+			});
 			localStorage.removeItem("burnt_token");
 			localStorage.removeItem("burnt_type");
 			localStorage.removeItem("burnt_user");
 			localStorage.removeItem("burnt_wallet");
 			navigate("/");
+		} catch (error) {
+			console.error(error);
 		}
 		setDeactivating(false);
 	}
 
 	async function fetchMe() {
-		const res = await fetch("/api/customer/me", {
-			headers: { Authorization: `Bearer ${token}` },
-		});
-		if (!res.ok) {
+		try {
+			const res = await axios.get("/api/customer/me", {
+				headers: { Authorization: `Bearer ${token}` }
+			});
+			const data = res.data;
+			setCustomer(data.customer);
+			setWallet(data.wallet);
+			localStorage.setItem("burnt_user", JSON.stringify(data.customer));
+			if (data.wallet) localStorage.setItem("burnt_wallet", JSON.stringify(data.wallet));
+			setLoading(false);
+		} catch {
 			navigate("/login");
-			return;
 		}
-		const data = await res.json();
-		setCustomer(data.customer);
-		setWallet(data.wallet);
-		localStorage.setItem("burnt_user", JSON.stringify(data.customer));
-		if (data.wallet) localStorage.setItem("burnt_wallet", JSON.stringify(data.wallet));
-		setLoading(false);
 	}
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: mount-only auth redirect
@@ -70,13 +72,13 @@ export default function Me() {
 		<div className="mx-auto max-w-7xl px-4 py-8">
 			<h1 className="mb-6 text-2xl font-bold text-burnt-text">Mi cuenta</h1>
 
-			<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-				<div className="space-y-4 lg:col-span-1">
+			<div className="grid grid-cols-3 gap-6">
+				<div className="col-span-1 space-y-4">
 					<ProfileCard customer={customer} token={token} onUpdate={fetchMe} />
 					<WalletCard wallet={wallet} />
 				</div>
 
-				<div className="space-y-6 lg:col-span-2">
+				<div className="col-span-2 space-y-6">
 					<EditProfile customer={customer} token={token} onUpdate={fetchMe} />
 					<FriendsCard token={token} customerName={customer.name} />
 

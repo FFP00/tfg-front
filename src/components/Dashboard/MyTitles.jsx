@@ -1,4 +1,4 @@
-import AuthImage from "../ui/AuthImage";
+import AuthImage from "../ui/AuthImage.jsx";
 
 export default function MyTitles({ titles, onEdit }) {
 	if (titles.length === 0) {
@@ -12,7 +12,7 @@ export default function MyTitles({ titles, onEdit }) {
 	}
 
 	return (
-		<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+		<div className="grid grid-cols-4 gap-3">
 			{titles.map((title) => (
 				<div
 					key={title.name}
@@ -36,7 +36,9 @@ export default function MyTitles({ titles, onEdit }) {
 					</div>
 					<div className="p-2">
 						<h3 className="truncate text-xs font-semibold text-burnt-text">{title.name}</h3>
-						<p className={`text-xs font-medium ${title.status ? "text-burnt-green" : "text-burnt-yellow"}`}>
+						<p
+							className={`text-xs font-medium ${title.status ? "text-burnt-green" : "text-burnt-yellow"}`}
+						>
 							{title.status ? "Publicado" : "Pendiente"}
 						</p>
 					</div>

@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight, Play } from "lucide-react";
 import { useState } from "react";
-import MediaImage from "../ui/MediaImage";
+import MediaImage from "../ui/MediaImage.jsx";
 
 const STORE_FIELDS = ["store_1", "store_2", "store_3", "store_4", "store_5", "store_6"];
 const ALL_MEDIA = [...STORE_FIELDS, "trailer"];
@@ -20,7 +20,6 @@ export default function MediaViewer({ encodedName, activeMedia, onSelect, capsul
 
 	return (
 		<div className="rounded-lg bg-burnt-panel p-3">
-			{/* Fila superior: capsule (opcional) + imagen principal */}
 			<div className="mb-3 flex gap-3">
 				{capsule && (
 					<div className="flex-none self-stretch overflow-hidden rounded-md border border-burnt-border bg-burnt-surface">
@@ -35,17 +34,14 @@ export default function MediaViewer({ encodedName, activeMedia, onSelect, capsul
 					</div>
 				)}
 
-				<div className="relative flex-1 aspect-video overflow-hidden rounded-md border border-burnt-border bg-burnt-surface">
+				<div className="relative aspect-video flex-1 overflow-hidden rounded-md border border-burnt-border bg-burnt-surface">
 					{activeMedia === "trailer" ? (
 						// biome-ignore lint/a11y/useMediaCaption: trailers no tienen subtítulos
 						<video className="h-full w-full" controls autoPlay>
 							<source src={`/api/title/${encodedName}/media/trailer`} type="video/mp4" />
 						</video>
 					) : (
-						<MediaImage
-							src={`/api/title/${encodedName}/media/${activeMedia}`}
-							alt="Imagen del juego"
-						/>
+						<MediaImage src={`/api/title/${encodedName}/media/${activeMedia}`} alt="Imagen del juego" />
 					)}
 
 					<button
@@ -66,7 +62,6 @@ export default function MediaViewer({ encodedName, activeMedia, onSelect, capsul
 				</div>
 			</div>
 
-			{/* Thumbnails centrados bajo la imagen principal */}
 			<div className="flex flex-wrap justify-center gap-1.5">
 				{STORE_FIELDS.map((field) => (
 					<ThumbnailButton

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import DepositForm from "./Deposit/DepositForm";
+import DepositForm from "./Deposit/DepositForm.jsx";
 
 export default function Deposit() {
 	const navigate = useNavigate();

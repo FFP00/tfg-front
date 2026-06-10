@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Check, UserMinus, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -11,14 +12,18 @@ export default function FriendsCard({ token, customerName }) {
 
 	useEffect(() => {
 		async function load() {
-			const [friendsRes, pendingRes] = await Promise.all([
-				fetch(`/api/customer/${encodeURIComponent(customerName)}/friends`),
-				fetch("/api/friendship/pending", {
-					headers: { Authorization: `Bearer ${token}` },
-				}),
-			]);
-			if (friendsRes.ok) setFriends(await friendsRes.json());
-			if (pendingRes.ok) setPending(await pendingRes.json());
+			try {
+				const [friendsRes, pendingRes] = await Promise.all([
+					axios.get(`/api/customer/${encodeURIComponent(customerName)}/friends`),
+					axios.get("/api/friendship/pending", {
+						headers: { Authorization: `Bearer ${token}` }
+					})
+				]);
+				setFriends(friendsRes.data);
+				setPending(pendingRes.data);
+			} catch (error) {
+				console.error(error);
+			}
 			setLoading(false);
 		}
 		load();
@@ -26,57 +31,59 @@ export default function FriendsCard({ token, customerName }) {
 
 	async function handleAccept(name) {
 		setActionError((prev) => ({ ...prev, [name]: null }));
-		const res = await fetch(`/api/friendship/${encodeURIComponent(name)}`, {
-			method: "PATCH",
-			headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-			body: JSON.stringify({ status: "accepted" }),
-		});
-		if (res.ok) {
+		try {
+			await axios.patch(
+				`/api/friendship/${encodeURIComponent(name)}`,
+				{ status: "accepted" },
+				{ headers: { Authorization: `Bearer ${token}` } }
+			);
 			setPending((prev) => prev.filter((p) => p.from_name !== name));
 			setFriends((prev) => [...prev, { name }]);
-		} else {
-			const data = await res.json();
-			setActionError((prev) => ({ ...prev, [name]: data.detail ?? "Error" }));
+		} catch (error) {
+			setActionError((prev) => ({
+				...prev,
+				[name]: error.response?.data?.detail ?? "Error"
+			}));
 		}
 	}
 
 	async function handleDecline(name) {
 		setActionError((prev) => ({ ...prev, [name]: null }));
-		const res = await fetch(`/api/friendship/${encodeURIComponent(name)}`, {
-			method: "DELETE",
-			headers: { Authorization: `Bearer ${token}` },
-		});
-		if (res.ok) {
+		try {
+			await axios.delete(`/api/friendship/${encodeURIComponent(name)}`, {
+				headers: { Authorization: `Bearer ${token}` }
+			});
 			setPending((prev) => prev.filter((p) => p.from_name !== name));
-		} else {
-			const data = await res.json();
-			setActionError((prev) => ({ ...prev, [name]: data.detail ?? "Error" }));
+		} catch (error) {
+			setActionError((prev) => ({
+				...prev,
+				[name]: error.response?.data?.detail ?? "Error"
+			}));
 		}
 	}
 
 	async function handleRemove(name) {
 		setActionError((prev) => ({ ...prev, [name]: null }));
-		const res = await fetch(`/api/friendship/${encodeURIComponent(name)}`, {
-			method: "DELETE",
-			headers: { Authorization: `Bearer ${token}` },
-		});
-		if (res.ok) {
+		try {
+			await axios.delete(`/api/friendship/${encodeURIComponent(name)}`, {
+				headers: { Authorization: `Bearer ${token}` }
+			});
 			setFriends((prev) => prev.filter((f) => f.name !== name));
-		} else {
-			const data = await res.json();
-			setActionError((prev) => ({ ...prev, [name]: data.detail ?? "Error" }));
+		} catch (error) {
+			setActionError((prev) => ({
+				...prev,
+				[name]: error.response?.data?.detail ?? "Error"
+			}));
 		}
 	}
 
 	return (
 		<div className="rounded-lg border border-burnt-border bg-burnt-card">
-			{/* Header */}
 			<div className="flex items-center gap-2 px-5 py-4">
 				<Users size={16} strokeWidth={1.75} className="text-burnt-muted" />
 				<span className="font-semibold text-burnt-text">Amigos</span>
 			</div>
 
-			{/* Tab selector */}
 			<div className="flex border-t border-burnt-border">
 				<button
 					type="button"
@@ -112,7 +119,6 @@ export default function FriendsCard({ token, customerName }) {
 				</button>
 			</div>
 
-			{/* Content */}
 			<div className="border-t border-burnt-border">
 				{loading ? (
 					<div className="flex justify-center py-8">
@@ -140,9 +146,7 @@ export default function FriendsCard({ token, customerName }) {
 										>
 											<UserMinus size={15} strokeWidth={1.75} />
 										</button>
-										{actionError[f.name] && (
-											<p className="text-xs text-burnt-red">{actionError[f.name]}</p>
-										)}
+										{actionError[f.name] && <p className="text-xs text-burnt-red">{actionError[f.name]}</p>}
 									</div>
 								</div>
 							))}

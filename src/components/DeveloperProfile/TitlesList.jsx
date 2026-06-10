@@ -1,4 +1,4 @@
-import GameCard from "../GameCard";
+import GameCard from "../GameCard.jsx";
 
 export default function TitlesList({ titles }) {
 	if (titles.length === 0) {
@@ -6,7 +6,7 @@ export default function TitlesList({ titles }) {
 	}
 
 	return (
-		<div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+		<div className="grid grid-cols-3 gap-4">
 			{titles.map((game) => (
 				<GameCard key={game.name} game={game} />
 			))}

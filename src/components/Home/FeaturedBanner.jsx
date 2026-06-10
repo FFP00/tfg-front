@@ -1,19 +1,21 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { formatPrice, getCustomerCurrency } from "../../utils/currency";
-
 export default function FeaturedBanner({ cart, addToCart, removeFromCart }) {
 	const [games, setGames] = useState([null, null, null]);
 
 	useEffect(() => {
 		async function fetchOne(seen) {
 			while (true) {
-				const r = await fetch("/api/title/random");
-				if (!r.ok) return null;
-				const g = await r.json();
-				if (!seen.has(g.name)) {
-					seen.add(g.name);
-					return g;
+				try {
+					const r = await axios.get("/api/title/random");
+					const g = r.data;
+					if (!seen.has(g.name)) {
+						seen.add(g.name);
+						return g;
+					}
+				} catch {
+					return null;
 				}
 			}
 		}
@@ -35,7 +37,13 @@ export default function FeaturedBanner({ cart, addToCart, removeFromCart }) {
 			</p>
 			<div className="grid grid-cols-3 gap-4">
 				{games.map((game, i) => (
-					<FeaturedCard key={game?.name ?? i} game={game} cart={cart} addToCart={addToCart} removeFromCart={removeFromCart} />
+					<FeaturedCard
+						key={game?.name ?? i}
+						game={game}
+						cart={cart}
+						addToCart={addToCart}
+						removeFromCart={removeFromCart}
+					/>
 				))}
 			</div>
 		</div>
@@ -43,8 +51,6 @@ export default function FeaturedBanner({ cart, addToCart, removeFromCart }) {
 }
 
 function FeaturedCard({ game, cart, addToCart, removeFromCart }) {
-	const currency = getCustomerCurrency();
-
 	if (!game) return null;
 
 	const base = parseFloat(game.release_price);
@@ -60,9 +66,9 @@ function FeaturedCard({ game, cart, addToCart, removeFromCart }) {
 	}
 
 	return (
-		<div className="group overflow-hidden rounded-lg border border-burnt-border bg-burnt-card flex flex-col">
+		<div className="group flex flex-col overflow-hidden rounded-lg border border-burnt-border bg-burnt-card">
 			<Link
-				to={`/game/${encodeURIComponent(game.name)}`}
+				to={`/shop/${encodeURIComponent(game.name)}`}
 				className="block aspect-2/3 overflow-hidden bg-burnt-panel"
 			>
 				<img
@@ -94,19 +100,15 @@ function FeaturedCard({ game, cart, addToCart, removeFromCart }) {
 								−{discount}%
 							</span>
 						)}
-						<span className="text-sm font-bold text-burnt-text">
-							{formatPrice(finalUsd, currency)}
-						</span>
+						<span className="text-sm font-bold text-burnt-text">${finalUsd.toFixed(2)}</span>
 						{discount > 0 && (
-							<span className="text-xs text-burnt-faint line-through">
-								{formatPrice(base, currency)}
-							</span>
+							<span className="text-xs text-burnt-faint line-through">${base.toFixed(2)}</span>
 						)}
 					</div>
 
 					<div className="flex gap-2">
 						<Link
-							to={`/game/${encodeURIComponent(game.name)}`}
+							to={`/shop/${encodeURIComponent(game.name)}`}
 							className="flex-1 rounded bg-burnt-accent py-2 text-center text-xs font-semibold text-white transition-colors hover:bg-burnt-accent-hover"
 						>
 							Dale una oportunidad

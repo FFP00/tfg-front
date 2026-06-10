@@ -1,8 +1,9 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
-import FeaturedBanner from "./Home/FeaturedBanner";
-import GameGrid from "./Home/GameGrid";
-import GenreRow from "./Home/GenreRow";
-import SearchBar from "./Home/SearchBar";
+import FeaturedBanner from "./Home/FeaturedBanner.jsx";
+import GameGrid from "./Home/GameGrid.jsx";
+import GenreRow from "./Home/GenreRow.jsx";
+import SearchBar from "./Home/SearchBar.jsx";
 
 export default function Home({ cart, addToCart, removeFromCart }) {
 	const [genres] = useState(() => JSON.parse(localStorage.getItem("burnt_genres") ?? "[]"));
@@ -25,10 +26,11 @@ export default function Home({ cart, addToCart, removeFromCart }) {
 			setGenresLoading(true);
 			const results = await Promise.all(
 				genres.map((g) =>
-					fetch(`/api/title/?genre=${encodeURIComponent(g.name)}`)
-						.then((r) => (r.ok ? r.json() : []))
-						.catch(() => []),
-				),
+					axios
+						.get(`/api/title/?genre=${encodeURIComponent(g.name)}`)
+						.then((r) => r.data)
+						.catch(() => [])
+				)
 			);
 			const map = {};
 			genres.forEach((g, i) => {
@@ -47,9 +49,12 @@ export default function Home({ cart, addToCart, removeFromCart }) {
 			const params = new URLSearchParams();
 			if (search.trim()) params.set("search", search.trim());
 			if (selectedGenre) params.set("genre", selectedGenre);
-			const res = await fetch(`/api/title/?${params}`);
-			if (res.ok) setSearchResults(await res.json());
-			else setSearchResults([]);
+			try {
+				const res = await axios.get(`/api/title/?${params}`);
+				setSearchResults(res.data);
+			} catch {
+				setSearchResults([]);
+			}
 			setSearchLoading(false);
 		}
 		doSearch();

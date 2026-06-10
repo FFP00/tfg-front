@@ -1,6 +1,7 @@
+import axios from "axios";
 import { Pencil } from "lucide-react";
 import { useRef, useState } from "react";
-import AvatarImage from "../ui/AvatarImage";
+import AvatarImage from "../ui/AvatarImage.jsx";
 
 export default function ProfileCard({ customer, token, onUpdate }) {
 	const profileRef = useRef(null);
@@ -13,11 +14,13 @@ export default function ProfileCard({ customer, token, onUpdate }) {
 		setUploading(true);
 		const form = new FormData();
 		form.append(field, file);
-		await fetch("/api/customer/me/image", {
-			method: "PATCH",
-			headers: { Authorization: `Bearer ${token}` },
-			body: form,
-		});
+		try {
+			await axios.patch("/api/customer/me/image", form, {
+				headers: { Authorization: `Bearer ${token}` }
+			});
+		} catch (error) {
+			console.error(error);
+		}
 		setUploading(false);
 		if (field === "banner") setBannerError(false);
 		setImgVersion(Date.now());
@@ -44,9 +47,7 @@ export default function ProfileCard({ customer, token, onUpdate }) {
 					/>
 				)}
 				<div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/40">
-					<span className="hidden text-sm font-medium text-white group-hover:block">
-						Cambiar banner
-					</span>
+					<span className="hidden text-sm font-medium text-white group-hover:block">Cambiar banner</span>
 				</div>
 				<input
 					ref={bannerRef}
@@ -86,7 +87,7 @@ export default function ProfileCard({ customer, token, onUpdate }) {
 				<p className="text-sm text-burnt-muted">{customer.email}</p>
 				{customer.country && (
 					<p className="mt-1 text-xs text-burnt-faint">
-						{customer.country.native_name} · {customer.country.currency?.symbol ?? ""}
+						{customer.country.native_name}
 					</p>
 				)}
 				<p className="mt-1 text-xs text-burnt-faint">
@@ -94,7 +95,7 @@ export default function ProfileCard({ customer, token, onUpdate }) {
 					{customer.created_at
 						? new Date(customer.created_at).toLocaleDateString("es-ES", {
 								year: "numeric",
-								month: "long",
+								month: "long"
 							})
 						: "—"}
 				</p>

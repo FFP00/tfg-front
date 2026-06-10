@@ -1,3 +1,4 @@
+import axios from "axios";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -8,15 +9,21 @@ export default function EditProfile({ customer, token, onUpdate }) {
 		email: customer.email ?? "",
 		password: "",
 		confirmPassword: "",
-		country_code: customer.country?.code ?? "",
+		country_code: customer.country?.code ?? ""
 	});
 	const [loading, setLoading] = useState(false);
 	const [msg, setMsg] = useState(null);
 
 	useEffect(() => {
-		fetch("/api/country/")
-			.then((r) => r.json())
-			.then(setCountries);
+		async function fetchData() {
+			try {
+				const res = await axios.get("/api/country/");
+				setCountries(res.data);
+			} catch (error) {
+				console.error(error);
+			}
+		}
+		fetchData();
 	}, []);
 
 	function handleChange(e) {
@@ -46,20 +53,16 @@ export default function EditProfile({ customer, token, onUpdate }) {
 			return;
 		}
 
-		const res = await fetch("/api/customer/me", {
-			method: "PATCH",
-			headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-			body: JSON.stringify(body),
-		});
-		const data = await res.json();
-
-		if (res.ok) {
-			localStorage.setItem("burnt_user", JSON.stringify(data));
+		try {
+			const res = await axios.patch("/api/customer/me", body, {
+				headers: { Authorization: `Bearer ${token}` }
+			});
+			localStorage.setItem("burnt_user", JSON.stringify(res.data));
 			setMsg({ type: "ok", text: "Perfil actualizado correctamente" });
 			setForm({ ...form, password: "", confirmPassword: "" });
 			onUpdate();
-		} else {
-			setMsg({ type: "err", text: data.detail ?? "Error al actualizar" });
+		} catch (error) {
+			setMsg({ type: "err", text: error.response?.data?.detail ?? "Error al actualizar" });
 		}
 		setLoading(false);
 	}

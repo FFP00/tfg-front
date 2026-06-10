@@ -1,4 +1,4 @@
-import GameCard from "../GameCard";
+import GameCard from "../GameCard.jsx";
 
 export default function GameGrid({ games, loading, cart, addToCart, removeFromCart }) {
 	if (loading) return null;
@@ -14,9 +14,15 @@ export default function GameGrid({ games, loading, cart, addToCart, removeFromCa
 	}
 
 	return (
-		<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+		<div className="grid grid-cols-5 gap-4">
 			{games.map((game) => (
-				<GameCard key={game.name} game={game} cart={cart} addToCart={addToCart} removeFromCart={removeFromCart} />
+				<GameCard
+					key={game.name}
+					game={game}
+					cart={cart}
+					addToCart={addToCart}
+					removeFromCart={removeFromCart}
+				/>
 			))}
 		</div>
 	);

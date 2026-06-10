@@ -1,9 +1,8 @@
 import { Plus, X } from "lucide-react";
 import { Link } from "react-router-dom";
-import { formatPrice, getCustomerCurrency } from "../utils/currency";
 
 export default function GameCard({ game, cart, addToCart, removeFromCart }) {
-	const currency = getCustomerCurrency();
+	const type = localStorage.getItem("burnt_type");
 	const base = parseFloat(game.release_price);
 	const discount = game.actual_discount;
 	const finalUsd = discount ? base * (1 - discount / 100) : base;
@@ -18,7 +17,7 @@ export default function GameCard({ game, cart, addToCart, removeFromCart }) {
 
 	return (
 		<Link
-			to={`/game/${encodeURIComponent(game.name)}`}
+			to={`/shop/${encodeURIComponent(game.name)}`}
 			className="group relative flex flex-col overflow-hidden rounded-md border border-burnt-border bg-burnt-card transition-all duration-200 hover:border-burnt-accent/50 hover:shadow-lg hover:shadow-burnt-accent/5"
 		>
 			<div className="aspect-2/3 overflow-hidden bg-burnt-panel">
@@ -45,16 +44,12 @@ export default function GameCard({ game, cart, addToCart, removeFromCart }) {
 								−{discount}%
 							</span>
 						)}
-						<span className="text-sm font-bold text-burnt-text">
-							{formatPrice(finalUsd, currency)}
-						</span>
+						<span className="text-sm font-bold text-burnt-text">${finalUsd.toFixed(2)}</span>
 						{discount > 0 && (
-							<span className="text-xs text-burnt-faint line-through">
-								{formatPrice(base, currency)}
-							</span>
+							<span className="text-xs text-burnt-faint line-through">${base.toFixed(2)}</span>
 						)}
 					</div>
-					{addToCart && (
+					{addToCart && type !== "developer" && (
 						<button
 							type="button"
 							onClick={handleCart}
@@ -65,11 +60,7 @@ export default function GameCard({ game, cart, addToCart, removeFromCart }) {
 									: "border border-burnt-border text-burnt-faint opacity-0 group-hover:opacity-100 hover:border-burnt-accent/50 hover:text-burnt-text"
 							}`}
 						>
-							{inCart ? (
-								<X size={14} strokeWidth={1.75} />
-							) : (
-								<Plus size={14} strokeWidth={1.75} />
-							)}
+							{inCart ? <X size={14} strokeWidth={1.75} /> : <Plus size={14} strokeWidth={1.75} />}
 						</button>
 					)}
 				</div>

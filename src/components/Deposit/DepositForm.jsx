@@ -1,3 +1,4 @@
+import axios from "axios";
 import { CreditCard } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -25,60 +26,59 @@ export default function DepositForm({ token, onSuccess }) {
 		setLoading(true);
 		setError(null);
 
-		const res = await fetch("/api/stripe/checkout", {
-			method: "POST",
-			headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-			body: JSON.stringify({ amount }),
-		});
-		const data = await res.json();
+		try {
+			const res = await axios.post(
+				"/api/stripe/checkout",
+				{ amount },
+				{ headers: { Authorization: `Bearer ${token}` } }
+			);
+			const data = res.data;
 
-		if (!res.ok) {
-			setError(data.detail ?? "Error al iniciar el pago con Stripe");
+			const popup = window.open(
+				data.checkout_url,
+				"stripe_checkout",
+				"width=520,height=680,scrollbars=yes,resizable=yes,left=400,top=100"
+			);
+
 			setLoading(false);
-			return;
-		}
+			setWaiting(true);
 
-		const popup = window.open(
-			data.checkout_url,
-			"stripe_checkout",
-			"width=520,height=680,scrollbars=yes,resizable=yes,left=400,top=100",
-		);
-
-		setLoading(false);
-		setWaiting(true);
-
-		pollRef.current = setInterval(() => {
-			if (!popup || popup.closed) {
-				clearInterval(pollRef.current);
-				setWaiting(false);
-				return;
-			}
-			try {
-				const path = popup.location?.pathname ?? "";
-				if (path.includes("/me/deposit/success")) {
-					const sessionId = new URLSearchParams(popup.location.search).get("session_id");
+			pollRef.current = setInterval(() => {
+				if (!popup || popup.closed) {
 					clearInterval(pollRef.current);
-					popup.close();
-					if (sessionId) {
-						fetch(`/api/stripe/success?session_id=${sessionId}`, {
-							headers: { Authorization: `Bearer ${token}` },
-						})
-							.then((r) => (r.ok ? r.json() : null))
-							.then((wallet) => {
-								if (wallet) {
+					setWaiting(false);
+					return;
+				}
+				try {
+					const path = popup.location?.pathname ?? "";
+					if (path.includes("/deposit/success")) {
+						const sessionId = new URLSearchParams(popup.location.search).get("session_id");
+						clearInterval(pollRef.current);
+						popup.close();
+						if (sessionId) {
+							axios
+								.get(`/api/stripe/success?session_id=${sessionId}`, {
+									headers: { Authorization: `Bearer ${token}` }
+								})
+								.then((r) => {
+									const wallet = r.data;
 									localStorage.setItem("burnt_wallet", JSON.stringify(wallet));
 									setWaiting(false);
 									onSuccess(wallet);
-								}
-							});
-					} else {
-						setWaiting(false);
+								})
+								.catch(() => setWaiting(false));
+						} else {
+							setWaiting(false);
+						}
 					}
+				} catch {
+					// popup en dominio externo (Stripe), seguir esperando
 				}
-			} catch {
-				// popup en dominio externo (Stripe), seguir esperando
-			}
-		}, 600);
+			}, 600);
+		} catch (err) {
+			setError(err.response?.data?.detail ?? "Error al iniciar el pago con Stripe");
+			setLoading(false);
+		}
 	}
 
 	const presets = ["5.00", "10.00", "20.00", "50.00"];
@@ -152,7 +152,7 @@ export default function DepositForm({ token, onSuccess }) {
 				</button>
 			)}
 
-			<div className="rounded-md border border-burnt-border bg-burnt-panel px-4 py-3 text-xs text-burnt-faint space-y-1">
+			<div className="space-y-1 rounded-md border border-burnt-border bg-burnt-panel px-4 py-3 text-xs text-burnt-faint">
 				<p className="font-medium text-burnt-muted">Tarjeta de prueba Stripe:</p>
 				<p>
 					Número: <span className="font-mono text-burnt-text">4242 4242 4242 4242</span>

@@ -6,11 +6,11 @@ export default function Library({ titles }) {
 	}
 
 	return (
-		<div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+		<div className="grid grid-cols-4 gap-2">
 			{titles.map((t) => (
 				<Link
 					key={t.name}
-					to={`/game/${encodeURIComponent(t.name)}`}
+					to={`/shop/${encodeURIComponent(t.name)}`}
 					title={t.name}
 					className="group overflow-hidden rounded-md border border-burnt-border transition-colors hover:border-burnt-accent/50"
 				>

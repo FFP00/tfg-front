@@ -1,3 +1,4 @@
+import axios from "axios";
 import { ImageIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -5,6 +6,7 @@ export default function AuthImage({ src, alt, className, onError }) {
 	const [url, setUrl] = useState(null);
 	const [failed, setFailed] = useState(false);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: onError is stable (callback prop)
 	useEffect(() => {
 		if (!src) {
 			setFailed(true);
@@ -15,19 +17,22 @@ export default function AuthImage({ src, alt, className, onError }) {
 		setUrl(null);
 		setFailed(false);
 		const token = localStorage.getItem("burnt_token");
-		fetch(src, { headers: token ? { Authorization: `Bearer ${token}` } : {} })
-			.then((res) => {
-				if (!res.ok) throw new Error("not ok");
-				return res.blob();
-			})
-			.then((blob) => {
-				objectUrl = URL.createObjectURL(blob);
+
+		async function load() {
+			try {
+				const res = await axios.get(src, {
+					responseType: "blob",
+					headers: token ? { Authorization: `Bearer ${token}` } : {}
+				});
+				objectUrl = URL.createObjectURL(res.data);
 				setUrl(objectUrl);
-			})
-			.catch(() => {
+			} catch {
 				setFailed(true);
 				onError?.();
-			});
+			}
+		}
+		load();
+
 		return () => {
 			if (objectUrl) URL.revokeObjectURL(objectUrl);
 		};
@@ -35,7 +40,9 @@ export default function AuthImage({ src, alt, className, onError }) {
 
 	if (failed) {
 		return (
-			<div className={`flex h-full w-full items-center justify-center bg-burnt-panel ${className ?? ""}`}>
+			<div
+				className={`flex h-full w-full items-center justify-center bg-burnt-panel ${className ?? ""}`}
+			>
 				<ImageIcon size={32} strokeWidth={1.5} className="text-burnt-faint" aria-hidden />
 			</div>
 		);

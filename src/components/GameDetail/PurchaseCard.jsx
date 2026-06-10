@@ -1,24 +1,33 @@
+import axios from "axios";
 import { ArrowRight, Check, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { formatPrice, getCustomerCurrency } from "../../utils/currency";
 
-export default function PurchaseCard({ game, encodedName, token, cart, addToCart, removeFromCart }) {
+export default function PurchaseCard({
+	game,
+	encodedName,
+	token,
+	cart,
+	addToCart,
+	removeFromCart
+}) {
 	const [owned, setOwned] = useState(false);
 	const user = JSON.parse(localStorage.getItem("burnt_user") ?? "null");
 
 	useEffect(() => {
 		if (!token || !user?.name) return;
-		fetch(`/api/customer/${encodeURIComponent(user.name)}/library`)
-			.then((r) => (r.ok ? r.json() : []))
-			.then((lib) => {
-				setOwned(lib.some((t) => t.name === decodeURIComponent(encodedName)));
-			})
-			.catch(() => {});
+		async function checkOwned() {
+			try {
+				const res = await axios.get(`/api/customer/${encodeURIComponent(user.name)}/library`);
+				setOwned(res.data.some((t) => t.name === decodeURIComponent(encodedName)));
+			} catch {
+				// ignore
+			}
+		}
+		checkOwned();
 	}, [token, user?.name, encodedName]);
 
 	const type = localStorage.getItem("burnt_type");
-	const currency = getCustomerCurrency();
 	const base = parseFloat(game.release_price);
 	const discount = game.actual_discount;
 	const finalUsd = discount ? base * (1 - discount / 100) : base;
@@ -32,7 +41,7 @@ export default function PurchaseCard({ game, encodedName, token, cart, addToCart
 	if (owned) {
 		return (
 			<Link
-				to={`/game/${encodedName}/owned`}
+				to={`/library/${encodedName}`}
 				className="flex items-center gap-2 rounded-md bg-burnt-accent px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-burnt-accent-hover"
 			>
 				Ir a mi biblioteca <ArrowRight size={15} strokeWidth={1.75} />
@@ -48,13 +57,20 @@ export default function PurchaseCard({ game, encodedName, token, cart, addToCart
 						−{discount}%
 					</span>
 				)}
-				<span className="text-xl font-bold text-burnt-text">{formatPrice(finalUsd, currency)}</span>
+				<span className="text-xl font-bold text-burnt-text">${finalUsd.toFixed(2)}</span>
 				{discount > 0 && (
-					<span className="text-sm text-burnt-faint line-through">{formatPrice(base, currency)}</span>
+					<span className="text-sm text-burnt-faint line-through">${base.toFixed(2)}</span>
 				)}
 			</div>
 
-			{addToCart ? (
+			{type === "developer" ? null : !token ? (
+				<Link
+					to="/login"
+					className="rounded-md border border-burnt-border px-4 py-2.5 text-sm text-burnt-muted transition-colors hover:text-burnt-text"
+				>
+					Inicia sesión para comprar
+				</Link>
+			) : (
 				<button
 					type="button"
 					onClick={handleCart}
@@ -74,13 +90,6 @@ export default function PurchaseCard({ game, encodedName, token, cart, addToCart
 						</>
 					)}
 				</button>
-			) : type !== "developer" && (
-				<Link
-					to="/login"
-					className="rounded-md border border-burnt-border px-4 py-2.5 text-sm text-burnt-muted transition-colors hover:text-burnt-text"
-				>
-					Inicia sesión para comprar
-				</Link>
 			)}
 		</div>
 	);

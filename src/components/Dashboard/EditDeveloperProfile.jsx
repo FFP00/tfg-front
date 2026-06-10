@@ -1,3 +1,4 @@
+import axios from "axios";
 import { ChevronDown } from "lucide-react";
 import { useRef, useState } from "react";
 
@@ -11,7 +12,7 @@ export default function EditDeveloperProfile({ developer, token, onUpdate }) {
 		website_url: developer.website_url ?? "",
 		password: "",
 		confirmPassword: "",
-		country_code: developer.country?.code ?? "",
+		country_code: developer.country?.code ?? ""
 	});
 	const [loading, setLoading] = useState(false);
 	const [uploading, setUploading] = useState(false);
@@ -38,7 +39,8 @@ export default function EditDeveloperProfile({ developer, token, onUpdate }) {
 		if (form.name !== developer.name) body.name = form.name;
 		if (form.email !== developer.email) body.email = form.email;
 		if (form.support_email !== developer.support_email) body.support_email = form.support_email;
-		if (form.website_url !== (developer.website_url ?? "")) body.website_url = form.website_url || null;
+		if (form.website_url !== (developer.website_url ?? ""))
+			body.website_url = form.website_url || null;
 		if (form.country_code !== (developer.country?.code ?? "")) body.country_code = form.country_code;
 		if (form.password) body.password = form.password;
 
@@ -48,20 +50,16 @@ export default function EditDeveloperProfile({ developer, token, onUpdate }) {
 			return;
 		}
 
-		const res = await fetch("/api/developer/me", {
-			method: "PATCH",
-			headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-			body: JSON.stringify(body),
-		});
-		const data = await res.json();
-
-		if (res.ok) {
-			localStorage.setItem("burnt_user", JSON.stringify(data));
+		try {
+			const res = await axios.patch("/api/developer/me", body, {
+				headers: { Authorization: `Bearer ${token}` }
+			});
+			localStorage.setItem("burnt_user", JSON.stringify(res.data));
 			setMsg({ type: "ok", text: "Perfil actualizado correctamente" });
 			setForm({ ...form, password: "", confirmPassword: "" });
 			onUpdate();
-		} else {
-			setMsg({ type: "err", text: data.detail ?? "Error al actualizar" });
+		} catch (error) {
+			setMsg({ type: "err", text: error.response?.data?.detail ?? "Error al actualizar" });
 		}
 		setLoading(false);
 	}
@@ -70,18 +68,19 @@ export default function EditDeveloperProfile({ developer, token, onUpdate }) {
 		setUploading(true);
 		const formData = new FormData();
 		formData.append(field, file);
-		await fetch("/api/developer/me/image", {
-			method: "PATCH",
-			headers: { Authorization: `Bearer ${token}` },
-			body: formData,
-		});
+		try {
+			await axios.patch("/api/developer/me/image", formData, {
+				headers: { Authorization: `Bearer ${token}` }
+			});
+		} catch (error) {
+			console.error(error);
+		}
 		setUploading(false);
 		onUpdate();
 	}
 
 	return (
 		<div className="space-y-4">
-			{/* Image card */}
 			<div className="overflow-hidden rounded-lg border border-burnt-border bg-burnt-card">
 				<button
 					type="button"
@@ -92,10 +91,14 @@ export default function EditDeveloperProfile({ developer, token, onUpdate }) {
 						src={`/api/developer/${developer.name}/image/banner`}
 						alt="Banner"
 						className="h-full w-full object-cover"
-						onError={(e) => { e.target.style.display = "none"; }}
+						onError={(e) => {
+							e.target.style.display = "none";
+						}}
 					/>
 					<div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/40">
-						<span className="hidden text-sm font-medium text-white group-hover:block">Cambiar banner</span>
+						<span className="hidden text-sm font-medium text-white group-hover:block">
+							Cambiar banner
+						</span>
 					</div>
 					<input
 						ref={bannerRef}
@@ -115,7 +118,9 @@ export default function EditDeveloperProfile({ developer, token, onUpdate }) {
 							src={`/api/developer/${developer.name}/image/profile`}
 							alt={developer.name}
 							className="h-full w-full object-cover"
-							onError={(e) => { e.target.style.display = "none"; }}
+							onError={(e) => {
+								e.target.style.display = "none";
+							}}
 						/>
 						<div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/50">
 							<span className="hidden text-xs text-white group-hover:block">✎</span>
@@ -134,7 +139,6 @@ export default function EditDeveloperProfile({ developer, token, onUpdate }) {
 				</div>
 			</div>
 
-			{/* Edit form */}
 			<div className="rounded-lg border border-burnt-border bg-burnt-card">
 				<div className="px-5 py-4">
 					<span className="font-semibold text-burnt-text">Editar perfil del estudio</span>

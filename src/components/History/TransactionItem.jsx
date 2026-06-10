@@ -12,7 +12,7 @@ export default function TransactionItem({ transaction }) {
 						month: "short",
 						day: "numeric",
 						hour: "2-digit",
-						minute: "2-digit",
+						minute: "2-digit"
 					})}
 				</span>
 				<span className="font-semibold text-burnt-text">${total}</span>
@@ -22,12 +22,12 @@ export default function TransactionItem({ transaction }) {
 				{transaction.titles.map((t) => (
 					<div key={t.name} className="flex items-center justify-between gap-4">
 						<Link
-							to={`/game/${encodeURIComponent(t.name)}`}
+							to={`/shop/${encodeURIComponent(t.name)}`}
 							className="truncate text-sm text-burnt-muted transition-colors hover:text-burnt-accent"
 						>
 							{t.name}
 						</Link>
-						<div className="flex items-center gap-2 shrink-0">
+						<div className="flex shrink-0 items-center gap-2">
 							{t.discount_applied > 0 && (
 								<span className="rounded bg-burnt-accent px-1.5 py-0.5 text-xs font-bold text-white">
 									−{t.discount_applied}%

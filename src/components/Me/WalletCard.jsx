@@ -11,13 +11,13 @@ export default function WalletCard({ wallet }) {
 			<p className="mb-5 text-4xl font-bold text-burnt-text">${balance.toFixed(2)}</p>
 			<div className="flex gap-2">
 				<Link
-					to="/me/deposit"
+					to="/deposit"
 					className="flex-1 rounded-md bg-burnt-accent py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-burnt-accent-hover"
 				>
 					Recargar
 				</Link>
 				<Link
-					to="/me/history"
+					to="/history"
 					className="flex-1 rounded-md border border-burnt-border py-2.5 text-center text-sm font-medium text-burnt-muted transition-colors hover:text-burnt-text"
 				>
 					Historial

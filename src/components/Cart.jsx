@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Check, ShoppingCart, X } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -24,28 +25,24 @@ export default function Cart({ cart, removeFromCart, clearCart }) {
 		setLoading(true);
 		setMsg(null);
 		try {
-			const res = await fetch("/api/transaction/", {
-				method: "POST",
-				headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-				body: JSON.stringify({ titles: cart.map((item) => item.name) }),
-			});
-			const data = await res.json();
-			if (res.ok) {
-				const w = JSON.parse(localStorage.getItem("burnt_wallet") ?? "null");
-				if (w) {
-					w.balance = data.wallet_balance;
-					localStorage.setItem("burnt_wallet", JSON.stringify(w));
-				}
-				setMsg({
-					type: "ok",
-					text: `${data.titles_purchased} juego${data.titles_purchased !== 1 ? "s" : ""} por $${parseFloat(data.total_spent).toFixed(2)}. Saldo restante: $${parseFloat(data.wallet_balance).toFixed(2)}`,
-				});
-				clearCart();
-			} else {
-				setMsg({ type: "err", text: data.detail ?? "Error al procesar la compra" });
+			const res = await axios.post(
+				"/api/transaction/",
+				{ titles: cart.map((item) => item.name) },
+				{ headers: { Authorization: `Bearer ${token}` } }
+			);
+			const data = res.data;
+			const w = JSON.parse(localStorage.getItem("burnt_wallet") ?? "null");
+			if (w) {
+				w.balance = data.wallet_balance;
+				localStorage.setItem("burnt_wallet", JSON.stringify(w));
 			}
-		} catch {
-			setMsg({ type: "err", text: "Error de conexión. Inténtalo de nuevo." });
+			setMsg({
+				type: "ok",
+				text: `${data.titles_purchased} juego${data.titles_purchased !== 1 ? "s" : ""} por $${parseFloat(data.total_spent).toFixed(2)}. Saldo restante: $${parseFloat(data.wallet_balance).toFixed(2)}`
+			});
+			clearCart();
+		} catch (error) {
+			setMsg({ type: "err", text: error.response?.data?.detail ?? "Error al procesar la compra" });
 		}
 		setLoading(false);
 	}
@@ -79,7 +76,7 @@ export default function Cart({ cart, removeFromCart, clearCart }) {
 					<p className="mb-6 text-sm text-burnt-muted">{msg.text}</p>
 					<div className="flex gap-3">
 						<Link
-							to="/me/library"
+							to="/library"
 							className="flex-1 rounded-md bg-burnt-accent py-3 text-center font-semibold text-white transition-colors hover:bg-burnt-accent-hover"
 						>
 							Ver mi biblioteca
@@ -93,9 +90,8 @@ export default function Cart({ cart, removeFromCart, clearCart }) {
 					</div>
 				</div>
 			) : (
-				<div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
-					{/* Item list — 3/4 */}
-					<div className="space-y-4 lg:col-span-3">
+				<div className="grid grid-cols-4 gap-6">
+					<div className="col-span-3 space-y-4">
 						{cart.map((item) => (
 							<div
 								key={item.name}
@@ -114,7 +110,7 @@ export default function Cart({ cart, removeFromCart, clearCart }) {
 								</div>
 								<div className="min-w-0 flex-1">
 									<Link
-										to={`/game/${encodeURIComponent(item.name)}`}
+										to={`/shop/${encodeURIComponent(item.name)}`}
 										className="block truncate text-base font-semibold text-burnt-text transition-colors hover:text-burnt-accent"
 									>
 										{item.name}
@@ -135,8 +131,7 @@ export default function Cart({ cart, removeFromCart, clearCart }) {
 						))}
 					</div>
 
-					{/* Summary — 1/4 */}
-					<div className="lg:col-span-1">
+					<div className="col-span-1">
 						<div className="rounded-lg border border-burnt-border bg-burnt-card p-5">
 							<p className="mb-1 text-xs font-semibold uppercase tracking-widest text-burnt-muted">
 								Resumen
@@ -186,7 +181,7 @@ export default function Cart({ cart, removeFromCart, clearCart }) {
 										<div className="mt-3 text-center">
 											<p className="mb-2 text-xs text-burnt-red">Saldo insuficiente</p>
 											<Link
-												to="/me/deposit"
+												to="/deposit"
 												className="text-xs font-medium text-burnt-accent hover:text-burnt-accent-hover"
 											>
 												Recargar saldo →

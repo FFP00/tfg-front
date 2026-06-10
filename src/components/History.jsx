@@ -1,7 +1,8 @@
+import axios from "axios";
 import { ShoppingCart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import TransactionItem from "./History/TransactionItem";
+import TransactionItem from "./History/TransactionItem.jsx";
 
 export default function History() {
 	const navigate = useNavigate();
@@ -18,10 +19,14 @@ export default function History() {
 			return;
 		}
 		async function load() {
-			const res = await fetch("/api/transaction/me", {
-				headers: { Authorization: `Bearer ${token}` },
-			});
-			if (res.ok) setTransactions(await res.json());
+			try {
+				const res = await axios.get("/api/transaction/me", {
+					headers: { Authorization: `Bearer ${token}` }
+				});
+				setTransactions(res.data);
+			} catch (error) {
+				console.error(error);
+			}
 			setLoading(false);
 		}
 		load();
@@ -39,7 +44,7 @@ export default function History() {
 			</div>
 
 			{!loading && transactions.length > 0 && (
-				<div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+				<div className="mb-6 grid grid-cols-3 gap-4">
 					<div className="rounded-md border border-burnt-border bg-burnt-card p-4 text-center">
 						<p className="text-2xl font-bold text-burnt-text">{transactions.length}</p>
 						<p className="text-xs text-burnt-muted">Transacciones</p>
@@ -50,7 +55,7 @@ export default function History() {
 						</p>
 						<p className="text-xs text-burnt-muted">Juegos comprados</p>
 					</div>
-					<div className="rounded-md border border-burnt-border bg-burnt-card p-4 text-center col-span-2 sm:col-span-1">
+					<div className="rounded-md border border-burnt-border bg-burnt-card p-4 text-center">
 						<p className="text-2xl font-bold text-burnt-text">${totalSpent}</p>
 						<p className="text-xs text-burnt-muted">Total gastado</p>
 					</div>

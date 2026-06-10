@@ -1,6 +1,7 @@
+import axios from "axios";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import AvatarImage from "./ui/AvatarImage";
+import AvatarImage from "./ui/AvatarImage.jsx";
 
 export default function CommunitySearch() {
 	const [tab, setTab] = useState("players");
@@ -18,8 +19,12 @@ export default function CommunitySearch() {
 		setLoading(true);
 		setSearched(true);
 		const endpoint = type === "players" ? "/api/customer/" : "/api/developer/";
-		const res = await fetch(`${endpoint}?search=${encodeURIComponent(query.trim())}`);
-		setResults(res.ok ? await res.json() : []);
+		try {
+			const res = await axios.get(`${endpoint}?search=${encodeURIComponent(query.trim())}`);
+			setResults(res.data);
+		} catch {
+			setResults([]);
+		}
 		setLoading(false);
 	}
 
@@ -47,7 +52,7 @@ export default function CommunitySearch() {
 				<div className="mb-4 flex overflow-hidden rounded-md border border-burnt-border bg-burnt-surface">
 					{[
 						{ id: "players", label: "Jugadores" },
-						{ id: "developers", label: "Desarrolladoras" },
+						{ id: "developers", label: "Desarrolladoras" }
 					].map(({ id, label }) => (
 						<button
 							key={id}
@@ -67,9 +72,7 @@ export default function CommunitySearch() {
 					value={search}
 					onChange={handleSearch}
 					placeholder={
-						tab === "players"
-							? "Buscar jugador por nombre o email..."
-							: "Buscar estudio por nombre..."
+						tab === "players" ? "Buscar jugador por nombre o email..." : "Buscar estudio por nombre..."
 					}
 					className="w-full rounded-md border border-burnt-border bg-burnt-panel px-4 py-3 text-sm text-burnt-text placeholder-burnt-faint focus:border-burnt-accent focus:outline-none"
 				/>
@@ -81,7 +84,7 @@ export default function CommunitySearch() {
 				</div>
 			) : !searched ? (
 				<div className="py-16 text-center">
-					<p className="text-burnt-muted text-sm">
+					<p className="text-sm text-burnt-muted">
 						Escribe para buscar {tab === "players" ? "jugadores" : "estudios"}
 					</p>
 				</div>
@@ -113,9 +116,7 @@ export default function CommunitySearch() {
 							</div>
 							<div className="min-w-0 flex-1">
 								<p className="truncate font-semibold text-burnt-text">{item.name}</p>
-								{item.country && (
-									<p className="text-xs text-burnt-muted">{item.country.native_name}</p>
-								)}
+								{item.country && <p className="text-xs text-burnt-muted">{item.country.native_name}</p>}
 								{tab === "developers" && item.website_url && (
 									<p className="truncate text-xs text-burnt-accent">{item.website_url}</p>
 								)}
@@ -125,7 +126,7 @@ export default function CommunitySearch() {
 								{item.created_at
 									? new Date(item.created_at).toLocaleDateString("es-ES", {
 											year: "numeric",
-											month: "short",
+											month: "short"
 										})
 									: "—"}
 							</p>

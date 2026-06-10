@@ -1,7 +1,6 @@
 import { ChevronLeft, ChevronRight, Plus, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { formatPrice, getCustomerCurrency } from "../../utils/currency";
 
 export default function GenreRow({ genre, cart, addToCart, removeFromCart }) {
 	const scrollRef = useRef(null);
@@ -42,7 +41,6 @@ export default function GenreRow({ genre, cart, addToCart, removeFromCart }) {
 	}
 
 	const inCart = (name) => cart?.some((item) => item.name === name);
-	const currency = getCustomerCurrency();
 
 	return (
 		<section className="mb-10">
@@ -51,7 +49,7 @@ export default function GenreRow({ genre, cart, addToCart, removeFromCart }) {
 			<div className="relative rounded-lg bg-burnt-panel p-3">
 				<div
 					ref={scrollRef}
-					className="grid grid-rows-2 grid-flow-col gap-3 overflow-x-auto auto-cols-[13rem] scrollbar-none"
+					className="grid auto-cols-[13rem] grid-flow-col grid-rows-2 gap-3 overflow-x-auto scrollbar-none"
 				>
 					{looped.map((game, i) => {
 						const base = parseFloat(game.release_price);
@@ -63,7 +61,7 @@ export default function GenreRow({ genre, cart, addToCart, removeFromCart }) {
 							<Link
 								// biome-ignore lint/suspicious/noArrayIndexKey: infinite loop intentional duplicates
 								key={`${game.name}-${i}`}
-								to={`/game/${encodeURIComponent(game.name)}`}
+								to={`/shop/${encodeURIComponent(game.name)}`}
 								className="group flex flex-col overflow-hidden rounded-md border border-burnt-border bg-burnt-card transition-colors hover:border-burnt-accent/50"
 							>
 								<div className="aspect-460/215 overflow-hidden bg-burnt-surface">
@@ -81,12 +79,8 @@ export default function GenreRow({ genre, cart, addToCart, removeFromCart }) {
 								</div>
 
 								<div className="flex flex-1 flex-col p-3">
-									<h3 className="mb-0.5 truncate text-sm font-semibold text-burnt-text">
-										{game.name}
-									</h3>
-									<p className="mb-2 truncate text-xs text-burnt-muted">
-										{game.developer_name ?? "—"}
-									</p>
+									<h3 className="mb-0.5 truncate text-sm font-semibold text-burnt-text">{game.name}</h3>
+									<p className="mb-2 truncate text-xs text-burnt-muted">{game.developer_name ?? "—"}</p>
 									<div className="mt-auto flex items-center justify-between gap-2">
 										<div className="flex items-center gap-1.5">
 											{discount > 0 && (
@@ -95,7 +89,7 @@ export default function GenreRow({ genre, cart, addToCart, removeFromCart }) {
 												</span>
 											)}
 											<span className="text-sm font-bold text-burnt-text">
-												{formatPrice(finalUsd, currency)}
+												${finalUsd.toFixed(2)}
 											</span>
 										</div>
 										{addToCart && (
@@ -109,11 +103,7 @@ export default function GenreRow({ genre, cart, addToCart, removeFromCart }) {
 														: "border border-burnt-border text-burnt-faint opacity-0 group-hover:opacity-100 hover:border-burnt-accent/50 hover:text-burnt-text"
 												}`}
 											>
-												{already ? (
-													<X size={14} strokeWidth={1.75} />
-												) : (
-													<Plus size={14} strokeWidth={1.75} />
-												)}
+												{already ? <X size={14} strokeWidth={1.75} /> : <Plus size={14} strokeWidth={1.75} />}
 											</button>
 										)}
 									</div>
@@ -123,7 +113,6 @@ export default function GenreRow({ genre, cart, addToCart, removeFromCart }) {
 					})}
 				</div>
 
-				{/* Botón izquierdo */}
 				<div className="pointer-events-none absolute inset-y-0 left-0 w-20 rounded-l-lg bg-linear-to-r from-burnt-panel to-transparent" />
 				<button
 					type="button"
@@ -133,7 +122,6 @@ export default function GenreRow({ genre, cart, addToCart, removeFromCart }) {
 					<ChevronLeft size={16} strokeWidth={1.75} />
 				</button>
 
-				{/* Botón derecho */}
 				<div className="pointer-events-none absolute inset-y-0 right-0 w-20 rounded-r-lg bg-linear-to-l from-burnt-panel to-transparent" />
 				<button
 					type="button"

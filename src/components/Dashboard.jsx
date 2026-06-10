@@ -1,14 +1,17 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import CreateTitle from "./Dashboard/CreateTitle";
-import EditDeveloperProfile from "./Dashboard/EditDeveloperProfile";
-import MyTitles from "./Dashboard/MyTitles";
+import CreateTitle from "./Dashboard/CreateTitle.jsx";
+import EditDeveloperProfile from "./Dashboard/EditDeveloperProfile.jsx";
+import MyTitles from "./Dashboard/MyTitles.jsx";
 
 export default function Dashboard() {
 	const navigate = useNavigate();
 	const token = localStorage.getItem("burnt_token");
 	const type = localStorage.getItem("burnt_type");
-	const developer = JSON.parse(localStorage.getItem("burnt_user") ?? "null");
+	const [developer, setDeveloper] = useState(
+		JSON.parse(localStorage.getItem("burnt_user") ?? "null")
+	);
 
 	const [titles, setTitles] = useState([]);
 	const [genres, setGenres] = useState([]);
@@ -17,20 +20,29 @@ export default function Dashboard() {
 	const [editingTitle, setEditingTitle] = useState(null);
 
 	async function loadTitles() {
-		const res = await fetch("/api/title/me", {
-			headers: { Authorization: `Bearer ${token}` },
-		});
-		if (res.ok) setTitles(await res.json());
+		try {
+			const res = await axios.get("/api/title/me", {
+				headers: { Authorization: `Bearer ${token}` }
+			});
+			setTitles(res.data);
+		} catch (error) {
+			console.error(error);
+		}
 	}
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: mount-only auth redirect
 	useEffect(() => {
 		if (!token || type !== "developer") {
 			navigate("/login");
 			return;
 		}
 		async function init() {
-			const [genresRes] = await Promise.all([fetch("/api/genre/"), loadTitles()]);
-			if (genresRes.ok) setGenres(await genresRes.json());
+			try {
+				const [genresRes] = await Promise.all([axios.get("/api/genre/"), loadTitles()]);
+				setGenres(genresRes.data);
+			} catch (error) {
+				console.error(error);
+			}
 			setLoading(false);
 		}
 		init();
@@ -63,7 +75,10 @@ export default function Dashboard() {
 		<div className="mb-6 flex gap-1 border-b border-burnt-border">
 			<button
 				type="button"
-				onClick={() => { setEditingTitle(null); setTab("titles"); }}
+				onClick={() => {
+					setEditingTitle(null);
+					setTab("titles");
+				}}
 				className={`px-5 pb-3 text-sm font-medium transition-colors ${
 					tab === "titles"
 						? "border-b-2 border-burnt-accent text-burnt-text"
@@ -79,7 +94,10 @@ export default function Dashboard() {
 			</button>
 			<button
 				type="button"
-				onClick={() => { setEditingTitle(null); setTab("create"); }}
+				onClick={() => {
+					setEditingTitle(null);
+					setTab("create");
+				}}
 				className={`px-5 pb-3 text-sm font-medium transition-colors ${
 					tab === "create"
 						? "border-b-2 border-burnt-accent text-burnt-text"
@@ -113,24 +131,21 @@ export default function Dashboard() {
 			) : (
 				<>
 					{tabBar}
-					<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-						<div className="lg:col-span-1">
+					<div className="grid grid-cols-3 gap-6">
+						<div className="col-span-1">
 							{developer && (
 								<EditDeveloperProfile
 									developer={developer}
 									token={token}
 									onUpdate={() => {
 										const updated = JSON.parse(localStorage.getItem("burnt_user") ?? "null");
-										if (updated) window.location.reload();
+										if (updated) setDeveloper(updated);
 									}}
 								/>
 							)}
 						</div>
-						<div className="overflow-hidden rounded-lg bg-burnt-panel p-3 lg:col-span-2">
-							<MyTitles
-								titles={titles}
-								onEdit={handleEdit}
-							/>
+						<div className="col-span-2 overflow-hidden rounded-lg bg-burnt-panel p-3">
+							<MyTitles titles={titles} onEdit={handleEdit} />
 						</div>
 					</div>
 				</>

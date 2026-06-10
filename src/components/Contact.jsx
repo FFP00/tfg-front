@@ -1,9 +1,9 @@
+import axios from "axios";
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
 
 export default function Contact() {
 	const token = localStorage.getItem("burnt_token");
-	const user = JSON.parse(localStorage.getItem("burnt_user") ?? "null");
 
 	const [textarea, setTextarea] = useState("");
 	const [loading, setLoading] = useState(false);
@@ -16,21 +16,18 @@ export default function Contact() {
 		setLoading(true);
 		setMsg(null);
 
-		const headers = { "Content-Type": "application/json" };
-		if (token) headers.Authorization = `Bearer ${token}`;
-
-		const res = await fetch("/api/contact/", {
-			method: "POST",
-			headers,
-			body: JSON.stringify({ textarea }),
-		});
-		const data = await res.json();
-
-		if (res.status === 201) {
-			setMsg({ type: "ok", text: data.detail ?? "Mensaje enviado correctamente." });
-			setTextarea("");
-		} else {
-			setMsg({ type: "err", text: data.detail ?? "Error al enviar el mensaje." });
+		try {
+			const res = await axios.post(
+				"/api/contact/",
+				{ textarea },
+				{ headers: { Authorization: `Bearer ${token}` } }
+			);
+			if (res.status === 201) {
+				setMsg({ type: "ok", text: res.data.detail ?? "Mensaje enviado correctamente." });
+				setTextarea("");
+			}
+		} catch (err) {
+			setMsg({ type: "err", text: err.response?.data?.detail ?? "Error al enviar el mensaje." });
 		}
 		setLoading(false);
 	}
